@@ -19,9 +19,13 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
 .pop{animation:pop .5s}
 @keyframes drop{from{transform:translate(-50%,-30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 #toast{animation:drop .3s}
+.nm{text-decoration:underline;text-decoration-color:#f97316;text-decoration-thickness:3px;text-underline-offset:.12em}
+.nm .zc{border-bottom:3px solid #f97316}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}40%{transform:translateX(14px)}60%{transform:translateX(-9px)}80%{transform:translateX(9px)}}
 .shake{animation:shake .6s}
 @keyframes fl{0%{opacity:.55}100%{opacity:0}}
+@keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(540deg);opacity:.9}}
+#conf span{position:fixed;top:0;animation:fall linear forwards;z-index:70;pointer-events:none}
 #flash{position:fixed;inset:0;background:#ef4444;opacity:0;pointer-events:none;z-index:45}
 #flash.on{animation:fl .9s}
 .zc{display:inline-flex;align-items:center;vertical-align:middle;margin:0 .03em}
@@ -33,10 +37,11 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
 </head>
 <body>
 <div id="flash"></div>
-<div id="app" class="max-w-[1500px] mx-auto p-3 md:p-4">
+<div id="app" class="max-w-[1800px] mx-auto p-3 md:p-4">
   <header class="flex flex-wrap items-center justify-between gap-2 mb-3">
     <h1 class="text-3xl md:text-5xl font-black text-orange-600">🐯 數學老虎追追追</h1>
-    <div class="flex gap-2">
+    <div class="flex flex-wrap gap-2">
+      <button onclick="sfx('click');openSetup()" class="btn bg-orange-500 !py-2 !text-lg">🏠 回首頁設定</button>
       <button id="bSnd" onclick="tgl('sound')" class="btn bg-sky-500 !py-2 !text-lg">🔊 音效開</button>
       <button id="bSpk" onclick="tgl('speak')" class="btn bg-violet-500 !py-2 !text-lg">🗣️ 朗讀開</button>
       <button id="bMc" onclick="tglMc()" class="btn bg-pink-500 !py-2 !text-lg">🔘 選擇題：開</button>
@@ -45,15 +50,11 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
     </div>
   </header>
 
-  <div class="grid lg:grid-cols-[1fr_300px] gap-3">
-    <main class="space-y-3 min-w-0">
-      <section class="card">
-        <div class="text-lg font-bold mb-2">🏃 賽道：別被老虎追到，先到終點🏁就贏啦！</div>
-        <div id="mini" class="relative h-10 mb-2 rounded-full bg-gradient-to-r from-orange-100 to-yellow-200 border-2 border-orange-200"></div>
-        <div id="track" class="flex gap-2 overflow-x-auto pb-2"></div>
-      </section>
-
-      <section class="card">
+  <div class="grid lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
+  <div class="space-y-3 min-w-0">
+    <section class="card !p-2"><div class="text-lg font-bold mb-1 px-1">🎲 大富翁賽道：順時針前進，別被老虎追到，先衝到終點🏁就贏啦！</div><div id="board"></div></section>
+  </div>
+  <main class="space-y-3 min-w-0"><section class="card">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
           <div class="text-lg font-bold">📝 題目 <span id="qmeta" class="text-sm text-gray-500"></span></div>
           <div class="flex gap-2">
@@ -61,6 +62,7 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
             <button onclick="tglAns()" class="btn bg-amber-500 !py-1 !text-base">👀 顯示答案</button>
           </div>
         </div>
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-2"><label class="flex items-center gap-2 font-black text-lg cursor-pointer"><input type="checkbox" id="tmChk" class="w-6 h-6" onchange="tmChange()"> ⏱️ 60 秒倒數</label><select id="tmMode" class="rounded-2xl border-4 border-rose-200 bg-white px-2 py-1 text-base font-bold"><option value="warn">時間到：只提醒</option><option value="bad">時間到：自動算答錯</option></select><span id="timer" class="text-4xl md:text-6xl font-black min-w-[5ch] text-center"></span></div>
         <div id="qtext" class="text-3xl md:text-5xl font-black text-center py-6 bg-yellow-50 rounded-2xl min-h-[130px] flex items-center justify-center">按「🎲 隨機出題」開始！</div>
         <div id="qans" class="text-center text-3xl font-black text-green-600 mt-2 min-h-[2.5rem]"></div>
         <div id="opts" class="grid grid-cols-2 gap-3 mt-1"></div>
@@ -76,12 +78,10 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
           <div id="turnBar" class="text-center text-2xl md:text-4xl font-black text-orange-600 mb-2"></div>
           <div id="picks" class="flex flex-wrap gap-2"></div>
         </div>
-      </section>
-
-      <section class="card">
+      </section><section class="card">
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
           <button onclick="sfx('click');openSetup()" class="btn bg-sky-500">⚙️ 設定與姓名</button>
-          <button onclick="sfx('click');openBank()" class="btn bg-indigo-500">📚 題庫管理</button>
+          <button onclick="sfx('click');editIdx=-1;pendingImg=null;openBank()" class="btn bg-indigo-500">📚 題庫管理</button>
           <button onclick="randQ()" class="btn bg-fuchsia-500">🎲 隨機出題</button>
           <button onclick="openPick()" class="btn bg-purple-500">📋 選擇題目</button>
           <button onclick="answer('ok')" class="btn bg-green-500">✅ 答對 +1</button>
@@ -89,27 +89,31 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
           <button onclick="answer('bad')" class="btn bg-rose-500">❌ 答錯</button>
           <button onclick="buzzer()" class="btn bg-orange-500">⚡ 搶答模式</button>
           <button onclick="resetGame()" class="btn bg-gray-500">🔄 重新開始</button>
+          <button onclick="undo()" class="btn bg-amber-500">↩️ 返回上一步</button>
+          <button onclick="tigerManual(1)" class="btn bg-red-500">🐯 老虎前進 1 步</button>
+          <button onclick="tigerManual(-1)" class="btn bg-teal-500">🐯 老虎後退 1 步</button>
         </div>
         <div class="mt-3 text-center font-bold text-orange-700" id="wrongInfo"></div>
-      </section>
-    </main>
-    <aside class="card h-fit"><div class="text-xl font-black mb-2">📊 小朋友戰況</div><div id="side" class="space-y-2"></div></aside>
-  </div>
+      </section></main>
+</div>
 </div>
 
 <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] bg-white border-4 border-orange-400 rounded-3xl shadow-2xl px-6 py-4 text-xl md:text-3xl font-black text-center"></div>
+<div id="avPop" class="hidden fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this)closeAv()"><div id="avGrid" class="bg-white rounded-3xl p-4 grid grid-cols-5 gap-2 shadow-2xl max-w-full"></div></div>
 <div id="modal" class="hidden fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-3"><div id="mbox" class="bg-white rounded-3xl shadow-2xl p-5 w-full max-w-3xl max-h-[92vh] overflow-y-auto"></div></div>
 
 <script>
-const AV=['🐥','👦','👧','🐰','🐼','🐱','🐸','🦁','🦊','🐨','🦄','🐯'];let END=15,len=25;
+const AV=['🐥','👦','👧','🐰','🐼','🐱','🐸','🦁','🦊','🐨','🦄','🐯','🐷'];let END=15,len=25,bonus=2;
 const DEF=[["15 + 8 = ?","23"],["27 + 36 = ?","63"],["45 + 19 = ?","64"],["38 + 24 = ?","62"],["50 - 17 = ?","33"],["72 - 28 = ?","44"],["91 - 35 = ?","56"],["100 - 64 = ?","36"],["小明有 18 顆糖，媽媽又給他 15 顆，現在共有幾顆？","33"],["書包裡有 42 枝筆，送給同學 19 枝，還剩幾枝？","23"],["樹上有 26 隻鳥，飛走 9 隻，還剩幾隻？","17"],["哥哥有 35 元，弟弟有 28 元，兩人共有多少元？","63"],["哪個比較大？ 78 和 87","87"],["哪個比較小？ 56 和 65","56"],["在 □ 填入 > 、< 或 =：49 □ 94","<"],["3 + 3 + 3 = ?（幾個 3 相加？）","9"],["2 × 4 = ?（4 個 2 相加）","8"],["5 × 3 = ?（3 個 5 相加）","15"],["每盤有 4 顆蘋果，3 盤共有幾顆？","12"],["每人分 2 塊餅乾，5 個人共需要幾塊？","10"]];
 let bank=DEF.map(x=>x.slice()),S=[],tiger=0,wrong=0,cur=null,showA=false,sound=true,speak=true,over=false,sel=new Set(),n=6;
 let D=Array.from({length:8},(_,i)=>({name:'小朋友'+(i+1),av:AV[i]}));
 try{const b=JSON.parse(localStorage.getItem('mtc_bank')||'null');if(Array.isArray(b)&&b.length)bank=b}catch(e){}
-try{const d=JSON.parse(localStorage.getItem('mtc_d')||'null');if(d&&Array.isArray(d.D)&&d.D.length===8){D=d.D;n=d.n;if([15,25,35,45].includes(d.len))len=d.len}}catch(e){}
+try{const d=JSON.parse(localStorage.getItem('mtc_d')||'null');if(d&&Array.isArray(d.D)&&d.D.length===8){D=d.D;n=d.n;if([15,25,35,45].includes(d.len))len=d.len;if([0,1,2].includes(d.bonus))bonus=d.bonus}}catch(e){}
+const fixItem=q=>{const m=String(q[0]).split(/[|｜]/);if(m.length>=2&&!q[1]){q[0]=m[0].trim();q[1]=m[1].trim();if(m[2]&&!q[3])q[3]=m[2].trim()}return q};
+bank=bank.map(fixItem);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const saveBank=()=>{pool=[];try{localStorage.setItem('mtc_bank',JSON.stringify(bank))}catch(e){}};
+const saveBank=()=>{pool=[];try{localStorage.setItem('mtc_bank',JSON.stringify(bank))}catch(e){toast('⚠️ 儲存空間不足：圖片題這次可以用，但重新整理後可能會消失，請刪掉一些圖片題',false)}};
 
 /* ---------- 音效 (Web Audio) ---------- */
 let ac;
@@ -125,6 +129,19 @@ function tone(f,d=.15,t='sine',at=0,v=.2,f2){
     o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+d+.02);
   }catch(e){}
 }
+function noise(d=.3,at=0,v=.2,f=1000,type='lowpass'){
+  if(!sound)return;
+  try{
+    if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended')ac.resume();
+    const n=Math.floor(ac.sampleRate*d),buf=ac.createBuffer(1,n,ac.sampleRate),a=buf.getChannelData(0);
+    for(let i=0;i<n;i++)a[i]=Math.random()*2-1;
+    const src=ac.createBufferSource(),fl=ac.createBiquadFilter(),g=ac.createGain(),t=ac.currentTime+at;
+    src.buffer=buf;fl.type=type;fl.frequency.value=f;
+    g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+    src.connect(fl);fl.connect(g);g.connect(ac.destination);src.start(t);
+  }catch(e){}
+}
 const SFX={
   click:()=>tone(660,.08,'triangle'),
   ok:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.2,'sine',i*.09)),
@@ -138,18 +155,23 @@ const SFX={
   roar:()=>{tone(90,.8,'sawtooth',0,.3,40);tone(140,.7,'square',.05,.14,60);tone(60,.9,'sawtooth',.1,.25,30)},
   scream:()=>{tone(1500,.6,'sawtooth',0,.1,600);tone(1900,.5,'triangle',.05,.08,800);tone(1300,.4,'sawtooth',.3,.08,500)},
   thump:()=>{tone(70,.18,'sine',0,.4,40);tone(70,.18,'sine',.26,.4,40)},
-  win:()=>[523,523,523,659,784,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',i*.14))
+  boom:()=>{tone(90,.5,'sine',0,.4,35);noise(.5,0,.3,700,'lowpass')},
+  crackle:()=>{for(let i=0;i<10;i++)noise(.05,.12+i*.06+Math.random()*.05,.1,4000,'highpass')},
+  applause:()=>{for(let i=0;i<34;i++)noise(.08,i*.09+Math.random()*.05,.09,2500+Math.random()*2000,'bandpass')},
+  drum:()=>{for(let i=0;i<13;i++)noise(.06,i*.07,.1+i*.012,350,'lowpass')},
+  lose:()=>{SFX.roar();noise(.7,0,.25,300,'lowpass');noise(1.2,.9,.07,500,'bandpass');[[392,.8],[370,1.25],[349,1.7]].forEach(([f,t])=>{tone(f,.4,'sawtooth',t,.12);tone(f*1.005,.4,'square',t,.05)});tone(330,1.4,'sawtooth',2.2,.14,180);tone(60,.6,'sine',3.5,.3,30)},
+  win:()=>{SFX.drum();setTimeout(()=>{[523,523,523,659,784,659,784,1047].forEach((f,i)=>{tone(f,.28,'triangle',i*.14,.14);tone(f/2,.28,'sawtooth',i*.14,.05)});[1047,1319,1568,2093].forEach((f,i)=>tone(f,.3,'sine',1.3+i*.12,.12));SFX.applause()},900)}
 };
 const sfx=k=>SFX[k]&&SFX[k]();
 
 /* ---------- 語音 (zh-TW) ---------- */
-const rd=t=>String(t).replace(/\+/g,' 加 ').replace(/[-−]/g,' 減 ').replace(/×/g,' 乘以 ').replace(/=/g,' 等於 ').replace(/>/g,' 大於 ').replace(/</g,' 小於 ').replace(/□/g,'框框').replace(/[?？]/g,' 多少 ');
+const rd=t=>String(t).replace(/[\uE000\uE001]/g,'').replace(/\+/g,' 加 ').replace(/[-−]/g,' 減 ').replace(/×/g,' 乘以 ').replace(/=/g,' 等於 ').replace(/>/g,' 大於 ').replace(/</g,' 小於 ').replace(/□/g,'框框').replace(/[?？]/g,' 多少 ');
 function say(t){
   if(!speak||!('speechSynthesis' in window))return;
   try{
     speechSynthesis.cancel();
     const v=getVoice();
-    String(t).replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{2BFF}\u{FE00}-\u{FE0F}\u200D]/gu,'').replace(/[（）()「」『』【】《》~～*＊#]/g,' ').split(/[。\n]/).forEach(seg=>{
+    speakFix(String(t)).replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{2BFF}\u{FE00}-\u{FE0F}\u200D]/gu,'').replace(/[（）()「」『』【】《》~～*＊#]/g,' ').split(/[。\n]/).forEach(seg=>{
       const pn=seg.includes('‼');
       seg.replace(/‼/g,'').split(/[！!；;]/).map(x=>x.trim()).filter(Boolean).forEach(x=>{
         const u=new SpeechSynthesisUtterance(x);u.lang='zh-TW';if(v)u.voice=v;u.rate=pn?1.12:.93;u.pitch=pn?1.45:1.08;speechSynthesis.speak(u);
@@ -157,6 +179,7 @@ function say(t){
     });
   }catch(e){}
 }
+function speakFix(t){S.forEach(s=>{if(s.say&&s.name&&s.say!==s.name)t=t.split(s.name).join(s.say)});return t}
 let vName='';try{vName=localStorage.getItem('mtc_voice')||''}catch(e){}
 function getVoice(){
   const all=speechSynthesis.getVoices(),zs=all.filter(v=>/^zh/i.test(v.lang));
@@ -216,22 +239,36 @@ function toast(t,voice){
 }
 
 /* ---------- 畫面 ---------- */
-function render(){
-  let h='';
-  for(let i=0;i<=END;i++){
-    const here=S.filter(s=>s.pos===i),lbl=i===0?'老虎窩':i===1?'起點':i===END?'終點🏁':i;
-    const bg=i===END?'bg-yellow-200 border-yellow-400':i===0?'bg-orange-100 border-orange-300':'bg-white border-pink-200';
-    h+=`<div class="shrink-0 w-28 min-h-[180px] rounded-2xl border-4 ${bg} p-1 flex flex-col items-center"><div class="text-sm font-black text-gray-500">${lbl}</div>${tiger===i?'<div class="text-5xl pop">🐯</div>':''}<div class="flex flex-wrap justify-center gap-1">${here.map(s=>`<div class="text-center leading-none"><div class="text-3xl">${s.av}</div><div class="text-[11px] font-bold">${esc(s.name)}</div></div>`).join('')}</div></div>`;
+const RING={16:[5,5],26:[8,7],36:[11,9],46:[14,11]};
+const TILE=['#fecaca','#fed7aa','#fef08a','#bbf7d0','#bfdbfe','#ddd6fe','#fbcfe8'];
+function cellXY(k,w,h){
+  if(k<h)return[h-1-k,0];
+  if(k<h+w-1)return[0,k-h+1];
+  if(k<2*h+w-2)return[k-(h+w-2),w-1];
+  return[h-1,w-2-(k-(2*h+w-2))];
+}
+function drawBoard(){
+  const[w,h]=RING[END+1]||[8,7];
+  let b=`<div style="display:grid;grid-template-columns:repeat(${w},1fr);grid-template-rows:repeat(${h},1fr);gap:4px;aspect-ratio:${w}/${h};width:min(100%,calc(82vh*${w}/${h}));margin:0 auto">`;
+  for(let k=0;k<=END;k++){
+    const[r,c]=cellXY(k,w,h),here=S.filter(s=>s.pos===k);
+    const bg=k===0?'#fdba74':k===END?'#fde047':TILE[k%TILE.length];
+    const lbl=k===0?'🐯窩':k===1?'起點':k===END?'終點🏁':k;
+    const items=(tiger===k?[{av:'🐯',name:'老虎',t:1}]:[]).concat(here);
+    const nI=items.length,cc=nI<=1?1:nI<=4?2:3,rr=Math.max(1,Math.ceil(nI/cc));
+    const av=`clamp(14px,min(${(100/cc*.6).toFixed(1)}cqw,${(86/rr*.5).toFixed(1)}cqh),52px)`,nm=`clamp(8px,min(${(100/cc*.2).toFixed(1)}cqw,${(86/rr*.16).toFixed(1)}cqh),20px)`;
+    b+=`<div style="grid-column:${c+1};grid-row:${r+1};background:${bg};container-type:size" class="relative rounded-xl border-2 border-white shadow overflow-hidden"><span class="absolute top-0 left-0 font-black text-gray-800 bg-white/70 rounded-br-lg px-1.5 leading-tight z-10" style="font-size:clamp(12px,1.5vw,24px)">${lbl}</span><div style="position:absolute;inset:0;padding-top:13cqh;display:grid;grid-template-columns:repeat(${cc},1fr);align-content:center;justify-items:center;align-items:center">${items.map(s=>`<div class="text-center leading-none ${s.t?'pop':''}" style="max-width:100%"><div style="font-size:14px;font-size:${av}">${s.av}</div><div class="font-bold" style="white-space:nowrap;font-size:9px;font-size:${nm}">${s.t?'':esc(s.name)}</div></div>`).join('')}</div></div>`;
   }
-  $('track').innerHTML=h;
-  $('mini').innerHTML='<span class="absolute right-2 top-1 text-xl">🏁</span>'+[...S.map(s=>[s.av,s.pos]),['🐯',tiger]].map(([a,p])=>`<span class="absolute top-1 text-xl -translate-x-1/2" style="left:${2+p/END*92}%">${a}</span>`).join('');
-  const T=$('track'),lead=Math.max(1,...S.map(s=>s.pos)),mid=(Math.min(tiger,lead)+lead)/2;
-  T.scrollTo({left:Math.max(0,mid*120+56-T.clientWidth/2),behavior:'smooth'});
-  $('side').innerHTML=S.map(s=>`<div class="rounded-2xl bg-orange-50 border-2 border-orange-200 p-2"><div class="flex items-center gap-2"><span class="text-3xl">${s.av}</span><span class="font-black text-lg truncate">${esc(s.name)}</span><span class="ml-auto text-sm font-bold text-sky-600">第 ${s.pos} 格</span></div><div class="flex justify-between font-bold mt-1 text-base"><span>⭐ ${s.stars}</span><span>🛡️ ${s.shields}</span><span>🔥 ${s.streak}</span></div></div>`).join('');
+  const chips=S.map(s=>`<div class="rounded-xl bg-white/80 px-1 py-0.5 text-center leading-tight ${rot&&S[turn]===s?'ring-4 ring-orange-400':''}"><div style="font-size:clamp(13px,1.6vw,24px)">${s.av} <b style="font-size:clamp(10px,1.05vw,16px)">${esc(s.name)}</b></div><div class="font-bold" style="font-size:clamp(9px,1vw,15px)">📍${s.pos} ⭐${s.stars} 🛡️${s.shields} 🔥${s.streak}</div></div>`).join('');
+  b+=`<div style="grid-column:2/${w};grid-row:2/${h}" class="rounded-2xl bg-gradient-to-br from-yellow-100 to-pink-100 border-4 border-white flex flex-col items-center justify-center text-center p-1 overflow-auto gap-1"><div class="font-black text-orange-600" style="font-size:clamp(12px,1.7vw,26px)">🐯 老虎在第 ${tiger} 格　答錯 ${'🔴'.repeat(wrong%2)}${'⚪'.repeat(2-wrong%2)}</div>${rot&&S.length?`<div class="font-black text-sky-700" style="font-size:clamp(12px,1.7vw,26px)">👉 輪到 ${S[turn].av} ${esc(S[turn].name)}</div>`:''}<div class="grid grid-cols-2 xl:grid-cols-4 gap-1 w-full">${chips}</div></div></div>`;
+  $('board').innerHTML=b;
+}
+function render(){
+  drawBoard();
   $('picks').innerHTML=S.map((s,i)=>`<label class="flex items-center gap-2 px-3 py-2 rounded-2xl border-4 cursor-pointer text-xl font-black ${sel.has(i)?'bg-yellow-200 border-orange-400':'bg-white border-gray-200'}"><input type="checkbox" class="w-6 h-6" ${sel.has(i)?'checked':''} onchange="tp(${i})"><span>${s.av} ${esc(s.name)}</span></label>`).join('');
-  $('turnBar').innerHTML=rot&&S.length?`👉 輪到 ${S[turn].av} ${esc(S[turn].name)}${turnN?'　🔥 答對了，再答一題！':''}`:'';
+  $('turnBar').innerHTML=over?'🏁 比賽結束！按「🔄 重新開始」再玩一次':rot&&S.length?`👉 輪到 ${S[turn].av} ${esc(S[turn].name)}${turnN?'　🔥 答對了，再答一題！':''}`:'';
   $('wrongInfo').textContent=`老虎位置：第 ${tiger} 格　｜　全班答錯累積：${wrong%2}/2（滿 2 題老虎前進 1 步）`;
-  $('qtext').innerHTML=cur?`<div class="leading-[2] text-center">${zhu?zy(cur[0]):esc(cur[0])}</div>`:'按「🎲 隨機出題」開始！';
+  $('qtext').innerHTML=cur?`<div class="leading-[2] text-center">${qHtml(cur[0])}</div>${cur[2]?`<img src="${cur[2]}" onclick="bigImg()" class="mx-auto mt-3 max-h-[42vh] rounded-xl border-4 border-white shadow cursor-zoom-in">`:''}`:'按「🎲 隨機出題」開始！';
   $('qans').textContent=cur&&showA?'答案：'+cur[1]:'';
   $('opts').innerHTML=mc&&O?O.list.map((o,i)=>{
     let c='bg-white border-sky-300 text-sky-700';
@@ -251,17 +288,21 @@ const GEN={
   sub(){const a=R(30,99),b=R(5,a-5);return[`${a} - ${b} = ?`,String(a-b)]},
   cmp(){let x=R(10,99),y=R(10,99);while(x===y)y=R(10,99);const big=Math.random()<.5;return[`哪個比較${big?'大':'小'}？ ${x} 和 ${y}`,String(big?Math.max(x,y):Math.min(x,y))]},
   mul(){const a=R(2,6),b=R(2,5);return[`${a} × ${b} = ?（${b} 個 ${a} 相加）`,String(a*b)]},
-  word(){const[u,t]=P(ITEMS),nm=S.length?P(S).name:'小明',k=R(0,2);
+  word(){
+    const[u,t]=P(ITEMS),k=R(0,2),ex=new Set([...sel]);if(rot&&S.length)ex.add(turn);
+    let pool=SH(S.filter((_,i)=>!ex.has(i)).map(s=>s.name));
+    if(!pool.length)pool=['小明'];
+    const M='\uE000',E='\uE001',nm=M+pool[0]+E,nm2=pool.length>1?M+pool[1]+E:'朋友';
     if(k===0){const a=R(12,50),b=R(8,40);return[`${nm}有 ${a} ${u}${t}，又拿到 ${b} ${u}，現在共有幾${u}？`,String(a+b)]}
-    if(k===1){const a=R(30,80),b=R(8,a-8);return[`${nm}有 ${a} ${u}${t}，送給朋友 ${b} ${u}，還剩幾${u}？`,String(a-b)]}
+    if(k===1){const a=R(30,80),b=R(8,a-8);return[`${nm}有 ${a} ${u}${t}，送給${nm2} ${b} ${u}，還剩幾${u}？`,String(a-b)]}
     const a=R(2,5),b=R(2,5);return[`每盒有 ${a} ${u}${t}，${b} 盒共有幾${u}？`,String(a*b)]}
 };
 let pool=[];
 const SH=a=>a.map(x=>[Math.random(),x]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
-let mc=true,O=null,zhu=true,rot=true,turn=0,turnN=0;
+let mc=true,O=null,zhu=true,rot=true,turn=0,turnN=0,hist=[];
 const ZD={},ZW={};
 ('哪ㄋㄚˇ 個ㄍㄜ˙ 比ㄅㄧˇ 較ㄐㄧㄠˋ 大ㄉㄚˋ 小ㄒㄧㄠˇ 和ㄏㄢˋ 在ㄗㄞˋ 填ㄊㄧㄢˊ 入ㄖㄨˋ 或ㄏㄨㄛˋ 有ㄧㄡˇ 顆ㄎㄜ 糖ㄊㄤˊ 媽ㄇㄚ 又ㄧㄡˋ 給ㄍㄟˇ 他ㄊㄚ 現ㄒㄧㄢˋ 共ㄍㄨㄥˋ 幾ㄐㄧˇ 書ㄕㄨ 包ㄅㄠ 裡ㄌㄧˇ 枝ㄓ 筆ㄅㄧˇ 送ㄙㄨㄥˋ 同ㄊㄨㄥˊ 學ㄒㄩㄝˊ 還ㄏㄞˊ 剩ㄕㄥˋ 樹ㄕㄨˋ 上ㄕㄤˋ 隻ㄓ 鳥ㄋㄧㄠˇ 飛ㄈㄟ 走ㄗㄡˇ 哥ㄍㄜ 弟ㄉㄧˋ 元ㄩㄢˊ 兩ㄌㄧㄤˇ 人ㄖㄣˊ 多ㄉㄨㄛ 少ㄕㄠˇ 每ㄇㄟˇ 盤ㄆㄢˊ 蘋ㄆㄧㄥˊ 果ㄍㄨㄛˇ 分ㄈㄣ 塊ㄎㄨㄞˋ 餅ㄅㄧㄥˇ 乾ㄍㄢ 需ㄒㄩ 要ㄧㄠˋ 盒ㄏㄜˊ 鉛ㄑㄧㄢ 貼ㄊㄧㄝ 紙ㄓˇ 氣ㄑㄧˋ 球ㄑㄧㄡˊ 故ㄍㄨˋ 事ㄕˋ 拿ㄋㄚˊ 到ㄉㄠˋ 朋ㄆㄥˊ 友ㄧㄡˇ 花ㄏㄨㄚ 朵ㄉㄨㄛˇ 張ㄓㄤ 本ㄅㄣˇ 相ㄒㄧㄤ 加ㄐㄧㄚ 明ㄇㄧㄥˊ '+
- '一ㄧ 二ㄦˋ 三ㄙㄢ 四ㄙˋ 五ㄨˇ 六ㄌㄧㄡˋ 七ㄑㄧ 八ㄅㄚ 九ㄐㄧㄡˇ 十ㄕˊ 百ㄅㄞˇ 千ㄑㄧㄢ 的ㄉㄜ˙ 是ㄕˋ 了ㄌㄜ˙ 不ㄅㄨˋ 我ㄨㄛˇ 你ㄋㄧˇ 她ㄊㄚ 們ㄇㄣ˙ 什ㄕㄣˊ 麼ㄇㄜ˙ 吃ㄔ 買ㄇㄞˇ 賣ㄇㄞˋ 錢ㄑㄧㄢˊ 角ㄐㄧㄠˇ 班ㄅㄢ 全ㄑㄩㄢˊ 部ㄅㄨˋ 老ㄌㄠˇ 師ㄕ 子ㄗ˙ 家ㄐㄧㄚ 先ㄒㄧㄢ 後ㄏㄡˋ 請ㄑㄧㄥˇ 問ㄨㄣˋ 答ㄉㄚˊ 對ㄉㄨㄟˋ 錯ㄘㄨㄛˋ 最ㄗㄨㄟˋ 都ㄉㄡ 差ㄔㄚ 把ㄅㄚˇ 公ㄍㄨㄥ 斤ㄐㄧㄣ 天ㄊㄧㄢ 日ㄖˋ').split(' ').forEach(e=>{ZD[e[0]]=e.slice(1)});
+ '一ㄧ 二ㄦˋ 三ㄙㄢ 四ㄙˋ 五ㄨˇ 六ㄌㄧㄡˋ 七ㄑㄧ 八ㄅㄚ 九ㄐㄧㄡˇ 十ㄕˊ 百ㄅㄞˇ 千ㄑㄧㄢ 的ㄉㄜ˙ 是ㄕˋ 了ㄌㄜ˙ 不ㄅㄨˋ 我ㄨㄛˇ 你ㄋㄧˇ 她ㄊㄚ 們ㄇㄣ˙ 什ㄕㄣˊ 麼ㄇㄜ˙ 吃ㄔ 買ㄇㄞˇ 賣ㄇㄞˋ 錢ㄑㄧㄢˊ 角ㄐㄧㄠˇ 班ㄅㄢ 全ㄑㄩㄢˊ 部ㄅㄨˋ 老ㄌㄠˇ 師ㄕ 子ㄗ˙ 家ㄐㄧㄚ 先ㄒㄧㄢ 後ㄏㄡˋ 請ㄑㄧㄥˇ 問ㄨㄣˋ 答ㄉㄚˊ 對ㄉㄨㄟˋ 錯ㄘㄨㄛˋ 最ㄗㄨㄟˋ 都ㄉㄡ 差ㄔㄚ 把ㄅㄚˇ 公ㄍㄨㄥ 斤ㄐㄧㄣ 天ㄊㄧㄢ 日ㄖˋ 看ㄎㄢˋ 圖ㄊㄨˊ 回ㄏㄨㄟˊ 沫ㄇㄛˋ 潾ㄌㄧㄣˊ').split(' ').forEach(e=>{ZD[e[0]]=e.slice(1)});
 '媽媽:ㄇㄚ/ㄇㄚ˙ 哥哥:ㄍㄜ/ㄍㄜ˙ 弟弟:ㄉㄧˋ/ㄉㄧ˙'.split(' ').forEach(e=>{const[w,z]=e.split(':');ZW[w]=z.split('/')});
 function zyH(z){
   const t='ˊˇˋ˙'.includes(z.slice(-1))?z.slice(-1):'',b=t?z.slice(0,-1):z;
@@ -278,8 +319,16 @@ function zy(txt){
   }
   return o;
 }
+function qHtml(t){
+  return String(t).split(/(\uE000.*?\uE001)/).map(p=>p.startsWith('\uE000')?`<span class="nm">${zhu?zy(p.slice(1,-1)):esc(p.slice(1,-1))}</span>`:(zhu?zy(p):esc(p))).join('');
+}
 function tglZh(){zhu=!zhu;$('bZh').textContent=zhu?'ㄅ 注音：開':'ㄅ 注音：關';sfx('click');render()}
 function mkOpts(q){
+  if(q[3]){
+    const a0=String(q[1]).trim();let l=[...new Set(String(q[3]).split(/[,，、]/).map(x=>x.trim()).filter(Boolean))];
+    if(a0){l=l.filter(x=>x!==a0);l=[a0,...l.slice(0,3)]}else l=l.slice(0,4);
+    if(l.length>=2)return SH(l);
+  }
   const a=String(q[1]).trim();
   if(/^[<>=]$/.test(a))return SH(['>','<','=']);
   if(!/^\d+$/.test(a))return null;
@@ -291,19 +340,58 @@ function mkOpts(q){
 }
 function buildO(){O=null;if(mc&&cur){const l=mkOpts(cur);if(l)O={list:l,ans:String(cur[1]).trim(),picked:null}}}
 function setQ(q,meta){
-  cur=q;showA=false;$('hardChk').checked=false;$('qmeta').textContent=meta;sfx('click');if(rot&&S.length)sel=new Set([turn]);buildO();render();
+  cur=q;showA=false;$('hardChk').checked=false;$('qmeta').textContent=meta;sfx('click');if(rot&&S.length)sel=new Set([turn]);buildO();render();tmQ++;judged=false;startTimer();
   say(qSpeech());
 }
 function qSpeech(){return (rot&&S.length?`輪到${S[turn].name}。`:'')+rd(cur[0])+(O?'。'+O.list.map((o,i)=>`選項${'ABCD'[i]}，${rd(o)}`).join('。'):'')}
 function pick(i){
   if(!O||O.picked!==null||over)return;
   if(!sel.size){sfx('bad');return toast('請先勾選上台答題的小朋友 ☝️')}
-  O.picked=i;const ok=O.list[i]===O.ans;sfx('click');render();
+  O.picked=i;stopTimer();const ok=O.list[i]===O.ans;sfx('click');render();
   setTimeout(()=>answer(ok?($('hardChk').checked?'hard':'ok'):'bad'),600);
 }
+function snap(){hist.push(JSON.stringify({S,tiger,wrong,turn,turnN,over}));if(hist.length>40)hist.shift()}
+function undo(){
+  if(!hist.length)return toast('目前沒有可以復原的步驟',false);
+  const h=JSON.parse(hist.pop());S=h.S;tiger=h.tiger;wrong=h.wrong;turn=h.turn;turnN=h.turnN;over=h.over;
+  sel=new Set(rot&&S.length?[turn]:[]);if(O)O.picked=null;
+  document.querySelectorAll('#conf,#fwc').forEach(e=>e.remove());
+  closeM();render();sfx('click');toast('↩️ 已復原上一步',false);
+}
+function tigerManual(d){
+  if(over)return toast('遊戲已結束，請按「🔄 重新開始」或「↩️ 返回上一步」',false);
+  snap();
+  if(d>0){
+    const msgs=[];tigerAdvance(msgs);render();
+    if(tiger>=END){over=true;render();setTimeout(lose,1800);return}
+    toast(msgs.join('\n'),msgs.join('。'));$('toast').style.whiteSpace='pre-line';
+  }else{tiger=Math.max(0,tiger-1);sfx('click');render();toast('🐯 老虎退後 1 步，大家加油～')}
+}
+let tmId=null,tmLeft=60,tmQ=0,judged=false;
+function tmShow(){
+  const e=$('timer');if(!e)return;
+  if(!$('tmChk').checked){e.textContent='';return}
+  e.textContent='⏱️ '+tmLeft;e.style.color=tmLeft<=10?'#dc2626':tmLeft<=20?'#ea580c':'#16a34a';
+}
+function stopTimer(){clearInterval(tmId);tmId=null}
+function startTimer(){
+  stopTimer();tmLeft=60;tmShow();
+  if(!$('tmChk').checked||!cur||over)return;
+  const q=tmQ;
+  tmId=setInterval(()=>{
+    tmLeft--;tmShow();
+    if(tmLeft>0&&tmLeft<=10)tone(880,.08,'square',0,.1);
+    if(tmLeft<=0){
+      stopTimer();sfx('buzz');alarmFx();toast('‼⏰ 時間到！','‼時間到！');
+      if($('tmMode').value==='bad')setTimeout(()=>{if(q===tmQ&&!judged&&!over&&sel.size){if(O&&O.picked===null)O.picked=-1;answer('bad')}},1500);
+    }
+  },1000);
+}
+function tmChange(){if($('tmChk').checked)startTimer();else{stopTimer();tmShow()}sfx('click')}
 function tglRot(){rot=!rot;$('bRot').textContent=rot?'🔁 輪流：開':'🔁 輪流：關';sel=new Set(rot&&S.length?[turn]:[]);sfx('click');render()}
 function skipTurn(){
   if(!rot||!S.length)return toast('請先開啟輪流模式',false);
+  snap();
   turn=(turn+1)%S.length;turnN=0;sel=new Set([turn]);sfx('click');render();
   toast(`換 ${S[turn].av}${S[turn].name} 囉！`);
 }
@@ -342,9 +430,10 @@ function tigerAdvance(msgs){
   else setTimeout(()=>sfx('thump'),700);
 }
 function answer(kind){
-  if(over)return toast('遊戲已結束，請按「🔄 重新開始」');
+  if(over)return toast('遊戲已結束，請按「🔄 重新開始」或「↩️ 返回上一步」');
   const P=S.filter((_,i)=>sel.has(i));
   if(!P.length){sfx('bad');return toast('請先勾選答題的小朋友 ☝️')}
+  snap();judged=true;stopTimer();
   const msgs=[],wasTurn=P.length===1&&S.indexOf(P[0])===turn;
   if(kind==='bad'){
     sfx('bad');
@@ -358,7 +447,7 @@ function answer(kind){
       const old=s.pos;let step=kind==='hard'?2:1;
       s.stars++;s.streak++;
       if(s.streak%3===0){s.shields++;sh=true;msgs.push(`${s.av}${s.name} 連對 3 題，獲得護盾🛡️`)}
-      if(s.stars%5===0){step+=2;msgs.push(`${s.av}${s.name} 集滿 5 顆星，加速前進 2 步！🌟`)}
+      if(bonus>0&&s.stars%5===0){step+=bonus;msgs.push(`${s.av}${s.name} 集滿 5 顆星，加速前進 ${bonus} 步！🌟`)}
       s.pos=Math.min(END,s.pos+step);
       if(tiger>0&&old<=tiger&&s.pos>=tiger)hurt=true;
     });
@@ -374,7 +463,8 @@ function answer(kind){
   }
   sel.clear();if(rot)sel.add(turn);render();
   const w=S.filter(s=>s.pos>=END);
-  if(w.length){over=true;setTimeout(()=>win(w),1400);return}
+  if(w.length){over=true;render();setTimeout(()=>win(w),1400);return}
+  if(tiger>=END){over=true;render();setTimeout(lose,1800);return}
   toast(msgs.join('\n'),msgs.join('。'));
   $('toast').style.whiteSpace='pre-line';
 }
@@ -385,38 +475,88 @@ function buzzer(){
   toast(`⚡ ${S[i].av} ${S[i].name} 搶到答題權！`,`${S[i].name} 搶到答題權`);
   $('toast').style.whiteSpace='normal';
 }
+function fireworks(ms){
+  const cv=document.createElement('canvas');
+  cv.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:65;pointer-events:none';
+  cv.id='fwc';cv.width=innerWidth;cv.height=innerHeight;document.body.appendChild(cv);
+  const x=cv.getContext('2d'),cols=['#ff4d4d','#ffd43b','#51cf66','#339af0','#f06595','#ff922b','#cc5de8'],end=Date.now()+ms;
+  let ps=[],rk=[],last=0;
+  function launch(){
+    rk.push({x:cv.width*(.12+Math.random()*.76),y:cv.height,vy:-cv.height*(.011+Math.random()*.004),ty:cv.height*(.15+Math.random()*.3),c:cols[Math.floor(Math.random()*cols.length)]});
+    tone(500,.5,'sine',0,.05,1500);
+  }
+  function boom(r){
+    for(let i=0;i<70;i++){const a=Math.PI*2*i/70,sp=2+Math.random()*5;ps.push({x:r.x,y:r.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,l:1,c:Math.random()<.3?'#ffffff':r.c})}
+    SFX.boom();SFX.crackle();
+  }
+  function frame(t){
+    if(Date.now()>end&&!ps.length&&!rk.length){cv.remove();return}
+    x.clearRect(0,0,cv.width,cv.height);
+    if(Date.now()<end&&t-last>420){launch();last=t}
+    rk.forEach(r=>{r.y+=r.vy;x.fillStyle=r.c;x.beginPath();x.arc(r.x,r.y,3,0,7);x.fill();if(r.y<=r.ty){r.dead=1;boom(r)}});
+    rk=rk.filter(r=>!r.dead);
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.vx*=.985;p.l-=.012;x.globalAlpha=Math.max(p.l,0);x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,2.8,0,7);x.fill()});
+    x.globalAlpha=1;ps=ps.filter(p=>p.l>0);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function confetti(em){
+  const c=document.createElement('div');c.id='conf';
+  for(let i=0;i<50;i++){const e=document.createElement('span');e.textContent=em[i%em.length];e.style.left=Math.random()*100+'vw';e.style.animationDuration=(2.5+Math.random()*2.5)+'s';e.style.animationDelay=(Math.random()*1.5)+'s';e.style.fontSize=(22+Math.random()*22)+'px';c.appendChild(e)}
+  document.body.appendChild(c);setTimeout(()=>c.remove(),7500);
+}
+function rankHtml(){
+  return `<div class="grid grid-cols-2 md:grid-cols-4 gap-2 my-4 text-left">${[...S].sort((a,b)=>b.pos-a.pos||b.stars-a.stars).map((s,i)=>`<div class="rounded-2xl bg-yellow-50 border-2 border-yellow-200 p-2 font-bold">${['🥇','🥈','🥉'][i]||(i+1)+'.'} ${s.av} ${esc(s.name)}<div class="text-sm">📍第 ${s.pos} 格　⭐${s.stars}</div></div>`).join('')}</div>`;
+}
+function endBtns(){return `<div class="flex flex-wrap justify-center gap-2"><button onclick="again()" class="btn bg-green-500">🔄 再玩一次</button><button onclick="undo()" class="btn bg-amber-500">↩️ 復原上一步</button><button onclick="closeM()" class="btn bg-sky-500">👀 看看棋盤</button><button onclick="closeM();openSetup()" class="btn bg-orange-500">🏠 回首頁設定</button></div>`}
 function win(w){
-  sfx('win');
+  sfx('win');confetti(['🎉','⭐','🎊','✨','🏆']);setTimeout(()=>fireworks(7000),900);
   const names=w.map(s=>s.av+' '+esc(s.name)).join('、');
-  $('mbox').innerHTML=`<div class="text-center"><div class="text-7xl pop">🏆🎉</div><div class="text-4xl font-black text-orange-600 my-4">${names}</div><div class="text-3xl font-black">衝過終點，贏過老虎啦！</div><div class="text-5xl my-3">🎊⭐🎊⭐🎊</div><button onclick="closeM()" class="btn bg-orange-500 mt-2">太棒了！</button></div>`;
-  $('modal').classList.remove('hidden');
-  say(w.map(s=>s.name).join('，')+' 衝過終點，贏過老虎了，恭喜！');
+  openM(`<div class="text-center"><div class="text-7xl pop">🏆🎉</div><div class="text-3xl md:text-5xl font-black text-orange-600 my-3">${names}</div><div class="text-2xl md:text-4xl font-black">衝過終點，贏過老虎啦！</div><div class="text-xl font-bold text-gray-600 mt-1">🏁 比賽結束 🏁</div>${rankHtml()}${endBtns()}</div>`);
+  say(w.map(s=>s.name).join('，')+' 衝過終點，贏過老虎了。比賽結束，恭喜你們！');
 }
-function resetGame(){
-  if(!confirm('確定要重新開始嗎？所有位置與星星都會歸零。'))return;
-  initGame();sfx('click');toast('🔄 遊戲重新開始！加油！');
+function lose(){
+  sfx('lose');alarmFx();confetti(['🍂','💧','☁️']);
+  openM(`<div class="text-center"><div class="text-7xl pop">🐯💨</div><div class="text-3xl md:text-5xl font-black text-rose-600 my-3">老虎先衝到終點了！</div><div class="text-2xl md:text-4xl font-black">比賽結束，這次老虎贏了～</div><div class="text-xl md:text-2xl font-bold text-gray-700 mt-2">大家都很努力，我們再挑戰一次，一定可以打敗老虎！💪</div>${rankHtml()}${endBtns()}</div>`);
+  say('‼老虎先衝到終點了！。比賽結束，這次老虎贏了。。大家都很努力，我們再挑戰一次，一定可以打敗老虎！');
 }
+function ask(msg,yes){
+  openM(`<div class="text-center"><div class="text-2xl md:text-3xl font-black mb-4">${msg}</div><div class="flex justify-center gap-3"><button id="askY" class="btn bg-rose-500">確定</button><button onclick="closeM()" class="btn bg-gray-500">取消</button></div></div>`);
+  $('askY').onclick=()=>{closeM();yes()};
+}
+function resetGame(){ask('確定要重新開始嗎？<br>所有位置與星星都會歸零。',again)}
+function again(){closeM();initGame();toast('🔄 遊戲重新開始！加油！')}
 function initGame(){
-  END=len;S=D.slice(0,n).map(d=>({name:d.name||'小朋友',av:d.av,g:d.g||'',pos:1,stars:0,shields:0,streak:0}));
-  tiger=0;wrong=0;over=false;turn=0;turnN=0;sel=new Set(rot?[0]:[]);render();
+  END=len;S=D.slice(0,n).map(d=>({name:d.name||'小朋友',av:d.av,g:d.g||'',say:(d.say||'').trim()||(d.name||'').replace(/沫/g,'墨'),pos:1,stars:0,shields:0,streak:0}));
+  tiger=0;wrong=0;over=false;turn=0;turnN=0;hist=[];stopTimer();tmShow();sel=new Set(rot?[0]:[]);render();
 }
 
 /* ---------- 彈窗 ---------- */
 function openM(h){$('mbox').innerHTML=h;$('modal').classList.remove('hidden')}
-function closeM(){$('modal').classList.add('hidden');sfx('click')}
+function closeM(){$('modal').classList.add('hidden');$('mbox').classList.remove('!max-w-[95vw]');sfx('click')}
 function openSetup(first){
   fixAv();
-  let h=`<div class="text-3xl font-black mb-3">${first?'🐯 歡迎來到數學老虎追追追！':'⚙️ 設定與姓名'}</div><div class="font-bold text-lg mb-1">參加人數：</div><div class="flex flex-wrap gap-2 mb-3">`;
+  let h=`<div class="text-3xl font-black mb-3">${first?'🐯 歡迎來到數學老虎追追追！':'🏠 首頁設定（人數・賽道長度・姓名・頭像）'}</div><div class="font-bold text-lg mb-1">參加人數：</div><div class="flex flex-wrap gap-2 mb-3">`;
   for(let k=2;k<=8;k++)h+=`<button onclick="setN(${k})" class="w-14 h-14 rounded-2xl text-2xl font-black ${k===n?'bg-orange-500 text-white':'bg-gray-100'}">${k}</button>`;
-  h+=`</div><div class="font-bold text-lg mb-1">賽道長度（越長題目越多）：</div><div class="flex flex-wrap gap-2 mb-1">${[15,25,35,45].map(L=>`<button onclick="setLen(${L})" class="px-4 py-2 rounded-2xl font-black text-lg leading-tight ${L===len?'bg-orange-500 text-white':'bg-gray-100'}">${L} 格<br><span class="text-sm font-bold">最快約 ${Math.ceil((L-1)/7*5)} 題</span></button>`).join('')}</div><div class="text-sm text-gray-500 mb-3">「最快」是指某位小朋友每題都上場、每題都答對。實際會輪流上場、也會答錯，通常要 1～2 倍的題數。</div><div class="font-bold text-lg mb-1">姓名、頭像（點頭像換圖案）、性別（點一下切換，影響鼓勵語）：</div><div class="grid sm:grid-cols-2 gap-2">`;
-  for(let i=0;i<n;i++)h+=`<div class="flex items-center gap-2"><button onclick="cyc(${i})" id="av${i}" class="text-4xl w-16 h-16 rounded-2xl bg-yellow-100 border-4 border-yellow-300">${D[i].av}</button><input value="${esc(D[i].name)}" oninput="D[${i}].name=this.value" class="flex-1 min-w-0 border-4 border-sky-200 rounded-2xl px-3 py-3 text-xl font-bold" maxlength="8"><button onclick="cg(${i})" id="g${i}" class="shrink-0 w-24 h-16 rounded-2xl bg-white border-4 border-sky-200 text-base font-black">${gl(D[i].g)}</button></div>`;
-  h+=`</div><div class="text-center mt-4"><button onclick="startGame()" class="btn bg-green-500">🚀 開始遊戲</button></div>`;
+  h+=`</div><div class="font-bold text-lg mb-1">賽道長度（越長題目越多）：</div><div class="flex flex-wrap gap-2 mb-1">${[15,25,35,45].map(L=>`<button onclick="setLen(${L})" class="px-4 py-2 rounded-2xl font-black text-lg leading-tight ${L===len?'bg-orange-500 text-white':'bg-gray-100'}">${L} 格<br><span class="text-sm font-bold">最快約 ${Math.ceil((L-1)/(5+bonus)*5)} 題</span></button>`).join('')}</div><div class="text-sm text-gray-500 mb-3">「最快」是指某位小朋友每題都上場、每題都答對。實際會輪流上場、也會答錯，通常要 1～2 倍的題數。</div><div class="font-bold text-lg mb-1">⭐ 累積集滿 5 顆星的獎勵（星星是整場累計，不用連續答對）：</div><div class="flex flex-wrap gap-2 mb-3">${[[2,'多走 2 步（原規則）'],[1,'多走 1 步'],[0,'不加速']].map(([b,t])=>`<button onclick="setBonus(${b})" class="px-4 py-2 rounded-2xl font-black text-lg ${b===bonus?'bg-orange-500 text-white':'bg-gray-100'}">${t}</button>`).join('')}</div><div class="font-bold text-lg mb-1">姓名、頭像（點頭像會跳出所有圖案）、性別（點一下切換）：</div><div class="grid sm:grid-cols-2 gap-2">`;
+  for(let i=0;i<n;i++)h+=`<div class="flex items-center gap-2"><button onclick="openAv(${i})" id="av${i}" class="text-4xl w-16 h-16 rounded-2xl bg-yellow-100 border-4 border-yellow-300">${D[i].av}</button><div class="flex-1 min-w-0 flex flex-col gap-1"><input value="${esc(D[i].name)}" oninput="D[${i}].name=this.value" class="min-w-0 border-4 border-sky-200 rounded-2xl px-3 py-2 text-xl font-bold" maxlength="8"><input value="${esc(D[i].say||'')}" oninput="D[${i}].say=this.value" placeholder="🔊 唸法（選填，例如：墨潾）" class="min-w-0 border-2 border-violet-200 rounded-xl px-2 py-1 text-sm font-bold"></div><button onclick="cg(${i})" id="g${i}" class="shrink-0 w-24 h-16 rounded-2xl bg-white border-4 border-sky-200 text-base font-black">${gl(D[i].g)}</button></div>`;
+  h+=`</div>${first?'':'<div class="text-center text-sm text-rose-600 font-bold mt-3">按「套用並重新開始」會讓全部小朋友的進度歸零；只是看看的話請按「回到遊戲」。</div>'}<div class="text-center mt-3 flex flex-wrap justify-center gap-2">${first?'':'<button onclick="closeM()" class="btn bg-gray-500">↩️ 回到遊戲（不重來）</button>'}<button onclick="startGame()" class="btn bg-green-500">🚀 ${first?'開始遊戲':'套用並重新開始'}</button></div>`;
   openM(h);
 }
+function setBonus(b){bonus=b;sfx('click');openSetup()}
 function setLen(L){len=L;sfx('click');openSetup()}
 const gl=g=>g==='m'?'👦 男':g==='f'?'👧 女':'⚪ 不分';
 function cg(i){D[i].g={'':'m',m:'f',f:''}[D[i].g||''];$('g'+i).textContent=gl(D[i].g);sfx('click')}
 function setN(k){n=k;sfx('click');openSetup()}
+let avIdx=0;
+function openAv(i){
+  avIdx=i;const used=new Set(D.slice(0,n).filter((_,j)=>j!==i).map(d=>d.av));
+  $('avGrid').innerHTML=AV.map(a=>`<button ${used.has(a)?'disabled':''} onclick="setAv('${a}')" class="text-4xl md:text-5xl w-16 h-16 md:w-20 md:h-20 rounded-2xl border-4 ${a===D[i].av?'border-orange-500 bg-yellow-100':'border-gray-200'} ${used.has(a)?'opacity-25':''}">${a}</button>`).join('');
+  $('avPop').classList.remove('hidden');sfx('click');
+}
+function setAv(a){D[avIdx].av=a;$('av'+avIdx).textContent=a;closeAv();sfx('click')}
+function closeAv(){$('avPop').classList.add('hidden')}
 function cyc(i){
   const used=new Set(D.slice(0,n).filter((_,j)=>j!==i).map(d=>d.av));
   let k=AV.indexOf(D[i].av);do{k=(k+1)%AV.length}while(used.has(AV[k]));
@@ -426,8 +566,9 @@ function fixAv(){
   const u=new Set();
   D.slice(0,n).forEach(d=>{if(u.has(d.av))d.av=AV.find(a=>!D.slice(0,n).some(x=>x.av===a));u.add(d.av)});
 }
-function startGame(){try{localStorage.setItem('mtc_d',JSON.stringify({D,n,len}))}catch(e){}initGame();closeM();sfx('ok');toast(`🐯 老虎來了！${n} 位小朋友加油！`)}
+function startGame(){try{localStorage.setItem('mtc_d',JSON.stringify({D,n,len,bonus}))}catch(e){}initGame();closeM();sfx('ok');toast(`🐯 老虎來了！${n} 位小朋友加油！`)}
 function openBank(){
+  if(editIdx>=bank.length){editIdx=-1;pendingImg=null}
   let h=`<div class="text-3xl font-black mb-3">📚 題庫管理（共 ${bank.length} 題）</div>
   <div class="grid gap-2 mb-3 bg-fuchsia-50 rounded-2xl p-3"><div class="font-black text-lg">⚡ 一鍵補題（中場休息用）</div>
     <div class="flex flex-wrap gap-2"><button onclick="genAdd(20)" class="btn bg-fuchsia-500 !py-2 !text-lg">🎁 自動新增 20 題</button><button onclick="genAdd(50)" class="btn bg-purple-500 !py-2 !text-lg">🎁 自動新增 50 題</button><button onclick="clearBank()" class="btn bg-rose-500 !py-2 !text-lg">🧹 清空題庫</button></div>
@@ -435,25 +576,60 @@ function openBank(){
   <div class="grid gap-2 mb-3"><div class="font-black text-lg">📥 批次貼上（一行一題，題目和答案用 | 隔開）</div>
     <textarea id="bulk" rows="4" placeholder="12 + 9 = ?|21&#10;小明有 8 顆糖，吃掉 3 顆，還剩幾顆？|5" class="border-4 border-indigo-200 rounded-2xl px-3 py-2 text-lg font-bold"></textarea>
     <div class="flex gap-2"><button onclick="bulkAdd(false)" class="btn bg-indigo-500 !py-2 !text-lg">➕ 加入題庫</button><button onclick="bulkAdd(true)" class="btn bg-amber-500 !py-2 !text-lg">♻️ 取代整個題庫</button></div></div>
-  <div class="grid gap-2 mb-3"><div class="font-black text-lg">✍️ 單題新增</div><input id="nq" placeholder="題目，例如：12 + 9 = ?" class="border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><div class="flex gap-2"><input id="na" placeholder="答案" class="flex-1 min-w-0 border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><button onclick="addQ()" class="btn bg-indigo-500 !py-2">➕ 新增</button></div></div><div class="space-y-1 mb-3">`;
-  bank.forEach((q,i)=>{h+=`<div class="flex items-center gap-2 bg-indigo-50 rounded-xl px-3 py-2"><span class="flex-1 font-bold">${i+1}. ${esc(q[0])} <span class="text-green-600">→ ${esc(q[1])}</span></span><button onclick="delQ(${i})" class="px-3 py-1 rounded-xl bg-rose-100 font-bold">🗑️</button></div>`});
+  <div class="grid gap-2 mb-3"><div class="font-black text-lg">${editIdx>=0?'✏️ 修改第 '+(editIdx+1)+' 題（改好按「儲存修改」）':'✍️ 單題新增（可附圖片，題目文字可留空）'}</div><input id="nq" placeholder="題目，例如：12 + 9 = ?" class="border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><div class="flex flex-wrap items-center gap-2"><label class="btn bg-teal-500 !py-2 !text-lg cursor-pointer">🖼️ 選圖片／拍照<input type="file" accept="image/*" class="hidden" onchange="pickImg(this)"></label><span class="text-sm text-gray-500">也可以先截圖，在這個視窗按 Ctrl+V 貼上</span></div><div id="imgPrev"></div>
+    <input id="no" placeholder="選項（選填，用逗號隔開，例如：甲,乙,丙；留空會自動產生）" class="border-4 border-indigo-200 rounded-2xl px-3 py-3 text-lg font-bold">
+    <div class="flex gap-2"><input id="na" placeholder="答案" class="flex-1 min-w-0 border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><button onclick="addQ()" class="btn bg-indigo-500 !py-2">${editIdx>=0?'💾 儲存修改':'➕ 新增'}</button>${editIdx>=0?'<button onclick="cancelEdit()" class="btn bg-gray-500 !py-2">取消</button>':''}</div></div><div class="space-y-1 mb-3">`;
+  bank.forEach((q,i)=>{h+=`<div class="flex items-center gap-2 ${i===editIdx?'bg-amber-100 ring-2 ring-amber-400':'bg-indigo-50'} rounded-xl px-3 py-2"><span class="flex-1 font-bold cursor-pointer" onclick="editQ(${i})">${i+1}. ${q[2]?`<img src="${q[2]}" class="inline h-9 rounded border mr-1">`:''}${esc(q[0])} <span class="text-green-600">→ ${esc(q[1])}</span>${q[3]?`<span class="text-gray-500 text-sm">　選項：${esc(q[3])}</span>`:''}</span><button onclick="editQ(${i})" class="px-3 py-1 rounded-xl bg-amber-100 font-bold">✏️ 修改</button><button onclick="delQ(${i})" class="px-3 py-1 rounded-xl bg-rose-100 font-bold">🗑️</button></div>`});
   h+=`</div><div class="flex gap-2 justify-between"><button onclick="resetBank()" class="btn bg-gray-500 !py-2 !text-lg">還原預設題庫</button><button onclick="closeM()" class="btn bg-sky-500 !py-2 !text-lg">完成</button></div>`;
   openM(h);
+  if(editIdx>=0&&bank[editIdx]){const q=bank[editIdx];$('nq').value=(q[2]&&q[0]==='請看圖回答')?'':q[0];$('na').value=q[1]||'';$('no').value=q[3]||''}
+  showPrev();
 }
+function editQ(i){editIdx=i;pendingImg=bank[i][2]||null;openBank();$('mbox').scrollTop=0;sfx('click')}
+function cancelEdit(){editIdx=-1;pendingImg=null;sfx('click');openBank()}
 function bulkAdd(r){
   const L=($('bulk').value||'').split(/\r?\n/).map(l=>l.split(/[|｜\t]/)).filter(p=>p[0].trim()).map(p=>[p[0].trim(),(p[1]||'').trim()]);
   if(!L.length)return toast('請先貼上題目（一行一題）',false);
-  if(r&&!confirm('會清掉目前所有題目，確定嗎？'))return;
-  bank=r?L:bank.concat(L);saveBank();sfx('ok');openBank();toast(`已${r?'取代為':'加入'} ${L.length} 題 ✅`,false);
+  const go=()=>{bank=r?L:bank.concat(L);saveBank();sfx('ok');openBank();toast(`已${r?'取代為':'加入'} ${L.length} 題 ✅`,false)};
+  if(r)ask('會清掉目前所有題目，確定嗎？',go);else go();
 }
 function genAdd(k){for(let i=0;i<k;i++)bank.push(GEN[P(Object.keys(GEN))]());saveBank();sfx('ok');openBank();toast(`已自動新增 ${k} 題 🎁`,false)}
-function clearBank(){if(confirm('確定清空全部題目嗎？')){bank=[];saveBank();openBank()}}
-function addQ(){const q=$('nq').value.trim(),a=$('na').value.trim();if(!q)return toast('請輸入題目',false);bank.push([q,a]);saveBank();sfx('ok');openBank()}
-function delQ(i){bank.splice(i,1);saveBank();sfx('click');openBank()}
-function resetBank(){if(confirm('要還原成預設題庫嗎？')){bank=DEF.map(x=>x.slice());saveBank();openBank()}}
+function clearBank(){ask('確定清空全部題目嗎？',()=>{bank=[];saveBank();openBank()})}
+let pendingImg=null,editIdx=-1;
+function fileToImg(f){return new Promise((res,rej)=>{
+  const r=new FileReader();
+  r.onload=()=>{const im=new Image();
+    im.onload=()=>{const k=Math.min(1,1100/Math.max(im.width,im.height)),c=document.createElement('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',.75))};
+    im.onerror=rej;im.src=r.result};
+  r.onerror=rej;r.readAsDataURL(f)})}
+function showPrev(){const e=$('imgPrev');if(e)e.innerHTML=pendingImg?`<div class="flex items-center gap-3"><img src="${pendingImg}" class="h-24 rounded-xl border-2 border-indigo-200"><button onclick="pendingImg=null;showPrev()" class="px-3 py-1 rounded-xl bg-rose-100 font-bold">✖ 移除圖片</button></div>`:''}
+function pickImg(inp){const f=inp.files&&inp.files[0];if(!f)return;fileToImg(f).then(d=>{pendingImg=d;showPrev();sfx('ok')}).catch(()=>toast('圖片讀取失敗，請換一張試試',false))}
+document.addEventListener('paste',e=>{
+  if(!$('imgPrev'))return;
+  const it=[...((e.clipboardData&&e.clipboardData.items)||[])].find(i=>i.type.startsWith('image/'));
+  if(!it)return;e.preventDefault();
+  fileToImg(it.getAsFile()).then(d=>{pendingImg=d;showPrev();sfx('ok');toast('已貼上圖片 ✅',false)}).catch(()=>{});
+});
+function bigImg(){
+  if(!cur||!cur[2])return;
+  openM(`<img src="${cur[2]}" class="max-w-full max-h-[82vh] mx-auto"><div class="text-center mt-3"><button onclick="closeM()" class="btn bg-sky-500 !py-2 !text-lg">關閉</button></div>`);
+  $('mbox').classList.add('!max-w-[95vw]');
+}
+function addQ(){
+  const q=$('nq').value.trim(),a=$('na').value.trim(),o=$('no').value.trim();
+  if(!q&&!pendingImg)return toast('請輸入題目文字，或選擇圖片',false);
+  const item=fixItem([q||'請看圖回答',a,pendingImg||'',o]);
+  if(editIdx>=0&&bank[editIdx]){bank[editIdx]=item;toast('已儲存修改 ✅',false)}else bank.push(item);
+  editIdx=-1;pendingImg=null;saveBank();sfx('ok');openBank();
+}
+function delQ(i){bank.splice(i,1);if(editIdx===i){editIdx=-1;pendingImg=null}else if(editIdx>i)editIdx--;saveBank();sfx('click');openBank()}
+function resetBank(){ask('要還原成預設題庫嗎？',()=>{bank=DEF.map(x=>x.slice());saveBank();openBank()})}
 function openPick(){
   sfx('click');
-  openM(`<div class="text-3xl font-black mb-3">📋 選擇題目</div><div class="grid gap-2">${bank.map((q,i)=>`<button onclick="closeM();showQ(${i})" class="text-left bg-purple-50 hover:bg-purple-100 rounded-2xl px-4 py-3 text-lg font-bold">${i+1}. ${esc(q[0])}</button>`).join('')}</div><div class="text-center mt-3"><button onclick="closeM()" class="btn bg-gray-500 !py-2 !text-lg">取消</button></div>`);
+  openM(`<div class="text-3xl font-black mb-3">📋 選擇題目</div><div class="grid gap-2">${bank.map((q,i)=>`<button onclick="closeM();showQ(${i})" class="text-left bg-purple-50 hover:bg-purple-100 rounded-2xl px-4 py-3 text-lg font-bold">${i+1}. ${q[2]?'🖼️ ':''}${esc(q[0])}</button>`).join('')}</div><div class="text-center mt-3"><button onclick="closeM()" class="btn bg-gray-500 !py-2 !text-lg">取消</button></div>`);
 }
 
 initGame();
