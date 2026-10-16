@@ -7,18 +7,17 @@
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style type="text/tailwindcss">
 @layer components{
-.btn{@apply rounded-2xl px-3 py-4 text-xl md:text-2xl font-black text-white shadow-lg active:scale-95 transition select-none}
-.card{@apply bg-white/90 rounded-3xl shadow-lg p-4 border-4 border-white}
+.btn{@apply rounded-xl px-4 py-2.5 text-lg font-bold text-white shadow active:scale-95 transition select-none whitespace-nowrap}
 }
 </style>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;min-height:100vh;color:#3b2a1a}
+body{background:#f6f3ee;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:#2f2a25;margin:0}
 @keyframes pop{0%{transform:scale(.4) rotate(-12deg)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 .pop{animation:pop .5s}
 @keyframes drop{from{transform:translate(-50%,-30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
-#toast{animation:drop .3s}
+#toast{animation:drop .3s;white-space:pre-line}
 .nm{text-decoration:underline;text-decoration-color:#f97316;text-decoration-thickness:3px;text-underline-offset:.12em}
 .nm .zc{border-bottom:3px solid #f97316}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}40%{transform:translateX(14px)}60%{transform:translateX(-9px)}80%{transform:translateX(9px)}}
@@ -33,82 +32,164 @@ body{background:linear-gradient(160deg,#fff4c2,#ffd9ec 60%,#d9f0ff);font-family:
 .zy b{writing-mode:vertical-rl;text-orientation:upright;font-weight:700;letter-spacing:-.08em}
 .zy i{font-style:normal;margin-left:.04em}
 .zy.n{flex-direction:column}.zy.n i{margin:0 0 .1em 0}
+
+html,body{height:100%}
+#app{display:flex;flex-direction:column;min-height:100dvh}
+#main{flex:1;min-height:0;display:grid;gap:10px;padding:8px 10px 10px;grid-template-columns:minmax(0,1fr)}
+.card{background:#fff;border:1px solid #e7e2da;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);padding:10px}
+.tb{border:1px solid #d6d0c7;background:#fff;color:#44403c;border-radius:10px;padding:4px 10px;font-size:14px;font-weight:700;white-space:nowrap;cursor:pointer}
+.tb:active{transform:scale(.96)}
+.tb-dark{background:#292524;color:#fff;border-color:#292524}
+.tl{border:1px solid #d6d0c7;background:#faf8f4;color:#292524;border-radius:12px;padding:10px 8px;font-size:15px;font-weight:700;text-align:center;cursor:pointer}
+.tl:active{transform:scale(.97)}
+.act{flex:1;border-radius:12px;padding:10px 12px;font-size:18px;font-weight:800;color:#fff;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.15);cursor:pointer}
+.act:active{transform:scale(.97)}
+#boardCard{display:flex;flex-direction:column;min-height:0}
+#boardWrap{height:56vh;flex:none;container-type:size;display:flex;align-items:center;justify-content:center;min-height:0}
+#qcard{display:flex;flex-direction:column;min-height:0;gap:8px}
+#qbody{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
+#qtext{font-weight:800;text-align:center;font-size:clamp(1.25rem,2.3vw,2.4rem);padding:10px 8px;background:#faf8f4;border-radius:12px;display:flex;align-items:center;justify-content:center;text-wrap:balance}
+#opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#actbar{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;background:#fff;padding-top:8px;border-top:1px solid #eee}
+@media (min-width:900px) and (min-height:520px){
+  body{overflow:hidden}
+  #app{height:100dvh;min-height:0}
+  #main{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  #boardWrap{height:auto;flex:1}
+}
 </style>
 </head>
 <body>
 <div id="flash"></div>
-<div id="app" class="max-w-[1800px] mx-auto p-3 md:p-4">
-  <header class="flex flex-wrap items-center justify-between gap-2 mb-3">
-    <div class="flex items-end gap-2"><h1 class="text-3xl md:text-5xl font-black text-orange-600">🐯 數學老虎追追追</h1><span class="text-sm font-bold text-gray-500">版本 1013.3</span></div>
-    <div class="flex flex-wrap gap-2">
-      <button onclick="sfx('click');openSetup()" class="btn bg-orange-500 !py-2 !text-lg">🏠 回首頁設定</button>
-      <button id="bSnd" onclick="tgl('sound')" class="btn bg-sky-500 !py-2 !text-lg">🔊 音效開</button>
-      <button id="bSpk" onclick="tgl('speak')" class="btn bg-violet-500 !py-2 !text-lg">🗣️ 朗讀開</button>
-      <button id="bMc" onclick="tglMc()" class="btn bg-pink-500 !py-2 !text-lg">🔘 選擇題：開</button>
-      <button id="bZh" onclick="tglZh()" class="btn bg-teal-600 !py-2 !text-lg">ㄅ 注音：開</button>
-      <select id="vSel" onchange="setVoice(this.value)" class="rounded-2xl border-4 border-violet-200 bg-white px-2 py-2 text-base font-bold max-w-[230px]"></select>
+<div id="app">
+  <header class="flex items-center gap-2 px-3 py-2 bg-white border-b border-stone-200 flex-wrap">
+    <div class="flex items-baseline gap-2 shrink-0"><h1 class="text-xl md:text-2xl font-black text-orange-600 whitespace-nowrap">🐯 數學老虎追追追</h1><span class="text-xs text-stone-400">版本 1016.4</span></div>
+    <div class="flex items-center gap-1.5 flex-wrap ml-auto justify-end">
+      <button onclick="sfx('click');openSetup()" class="tb">🏠 首頁</button>
+      <button onclick="openRules()" class="tb">📖 規則</button>
+      <button id="bSnd" onclick="tgl('sound')" class="tb">🔊 音效開</button>
+      <button id="bSpk" onclick="tgl('speak')" class="tb">🗣️ 朗讀開</button>
+      <button id="bMc" onclick="tglMc()" class="tb">🔘 選擇題：開</button>
+      <button id="bZh" onclick="tglZh()" class="tb">ㄅ 注音：開</button>
+      <button id="bTools" onclick="toggleTools()" class="tb tb-dark">⚙️ 更多工具</button>
     </div>
   </header>
 
-  <div class="grid lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
-  <div class="space-y-3 min-w-0">
-    <section class="card !p-2"><div class="text-lg font-bold mb-1 px-1">🎲 大富翁賽道：順時針前進，別被老虎追到，先衝到終點🏁就贏啦！</div><div id="board"></div></section>
+  <div id="main">
+    <section id="boardCard" class="card">
+      <div class="text-sm font-bold text-stone-500 px-1 pb-1">🏁 順時針前進，比老虎先到終點就贏！</div>
+      <div id="boardWrap"><div id="board"></div></div>
+    </section>
+
+    <section id="qcard" class="card">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <select id="qmode" onchange="pool=[];sfx('click')" class="rounded-lg border border-stone-300 bg-white px-2 py-1 text-sm font-bold max-w-[210px]"><optgroup label="📚 題庫（老師整理好的題目）"><option value="bank">題庫・全部單元</option><option value="bank:第一單元 200以內的數">題庫・第一單元 200以內的數</option><option value="bank:第二單元 二位數的直式加減">題庫・第二單元 二位數的直式加減</option><option value="bank:第三單元 量長度">題庫・第三單元 量長度</option><option value="bank:第四單元 加減關係與應用">題庫・第四單元 加減關係與應用</option><option value="bank:第五單元 面積的大小比較">題庫・第五單元 面積的大小比較</option><option value="bank:學習加油站（一）">題庫・學習加油站（一）</option></optgroup><optgroup label="♾️ 自動出題（電腦隨機產生，永遠出不完）"><option value="mix">自動・混合</option><option value="place">自動・數與位值</option><option value="money">自動・錢幣</option><option value="cmp">自動・比大小</option><option value="add">自動・直式加法</option><option value="sub">自動・直式減法</option><option value="len">自動・量長度</option><option value="rel">自動・加減關係</option><option value="word">自動・應用題</option><option value="area">自動・面積比較</option><option value="unk">自動・加減數未知應用題</option><option value="chk">自動・驗算</option></optgroup></select>
+        <button onclick="helpQ()" class="tb" title="出題方式說明">❓</button>
+        <span id="timer" class="text-2xl font-black min-w-[4ch] text-center"></span>
+        <div class="ml-auto flex gap-1.5">
+          <button onclick="readQ()" class="tb">🔊 朗讀</button>
+          <button onclick="readOpts()" class="tb">🔠 念選項</button>
+          <button onclick="tglAns()" class="tb">👀 看答案</button>
+        </div>
+      </div>
+      <div id="qmeta" class="text-xs text-stone-500 min-h-[1rem] px-1"></div>
+      <div id="qbody">
+        <div id="qtext">按「🎲 出題」開始！</div>
+        <div id="qans" class="text-center text-xl font-black text-green-600 min-h-[1.5rem]"></div>
+        <div id="opts"></div>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <div id="turnBar" class="text-lg md:text-xl font-black text-orange-600 flex-1 min-w-0"></div>
+          <button onclick="selAll()" class="tb">全選</button><button onclick="selNone()" class="tb">清除</button>
+        </div>
+        <div id="picks" class="flex flex-wrap gap-1.5 max-h-[5.2rem] overflow-auto"></div>
+      </div>
+      <div id="actbar">
+        <label class="flex items-center gap-1 text-sm font-bold cursor-pointer whitespace-nowrap"><input type="checkbox" id="hardChk" class="w-5 h-5"> 🌟 難題 +2</label>
+        <button onclick="randQ()" class="act" style="background:#4f46e5">🎲 出題</button>
+        <button onclick="okClick()" class="act" style="background:#16a34a">✅ 答對</button>
+        <button onclick="answer('bad')" class="act" style="background:#e11d48">❌ 答錯</button>
+      </div>
+    </section>
   </div>
-  <main class="space-y-3 min-w-0"><section class="card">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <div class="text-lg font-bold">📝 題目 <span id="qmeta" class="text-sm text-gray-500"></span></div>
-          <div class="flex gap-2">
-            <select id="qmode" onchange="sfx('click')" class="rounded-2xl border-4 border-fuchsia-200 bg-white px-2 py-1 text-base font-bold"><option value="bank">📚 題庫（不重複）</option><option value="mix">♾️ 自動出題・混合</option><option value="add">♾️ 加法</option><option value="sub">♾️ 減法</option><option value="cmp">♾️ 比大小</option><option value="mul">♾️ 乘法</option><option value="word">♾️ 應用題</option></select><button onclick="readQ()" class="btn bg-teal-500 !py-1 !text-base">🔊 朗讀題目</button>
-            <button onclick="tglAns()" class="btn bg-amber-500 !py-1 !text-base">👀 顯示答案</button>
-          </div>
-        </div>
-        <div class="flex flex-wrap items-center justify-center gap-3 mb-2"><label class="flex items-center gap-2 font-black text-lg cursor-pointer"><input type="checkbox" id="tmChk" class="w-6 h-6" onchange="tmChange()"> ⏱️ 60 秒倒數</label><select id="tmMode" class="rounded-2xl border-4 border-rose-200 bg-white px-2 py-1 text-base font-bold"><option value="warn">時間到：只提醒</option><option value="bad">時間到：自動算答錯</option></select><span id="timer" class="text-4xl md:text-6xl font-black min-w-[5ch] text-center"></span></div>
-        <div id="qtext" class="text-3xl md:text-5xl font-black text-center py-6 bg-yellow-50 rounded-2xl min-h-[130px] flex items-center justify-center">按「🎲 隨機出題」開始！</div>
-        <div id="qans" class="text-center text-3xl font-black text-green-600 mt-2 min-h-[2.5rem]"></div>
-        <div id="opts" class="grid grid-cols-2 gap-3 mt-1"></div>
-        <label class="flex items-center justify-center gap-2 mt-3 text-lg font-black cursor-pointer"><input type="checkbox" id="hardChk" class="w-6 h-6"> 🌟 這題是難題（點對 +2 步）</label>
-        <div class="mt-3">
-          <div class="flex flex-wrap items-center gap-2 mb-2">
-            <span class="font-bold text-lg">👇 勾選答題的小朋友：</span>
-            <button onclick="selAll()" class="px-3 py-1 rounded-xl bg-gray-200 font-bold">全選</button>
-            <button onclick="selNone()" class="px-3 py-1 rounded-xl bg-gray-200 font-bold">清除</button>
-            <button id="bRot" onclick="tglRot()" class="px-3 py-1 rounded-xl bg-orange-200 font-bold">🔁 輪流：開</button>
-            <button onclick="skipTurn()" class="px-3 py-1 rounded-xl bg-sky-200 font-bold">⏭️ 換下一位</button>
-          </div>
-          <div id="turnBar" class="text-center text-2xl md:text-4xl font-black text-orange-600 mb-2"></div>
-          <div id="picks" class="flex flex-wrap gap-2"></div>
-        </div>
-      </section><section class="card">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <button onclick="sfx('click');openSetup()" class="btn bg-sky-500">⚙️ 設定與姓名</button>
-          <button onclick="sfx('click');editIdx=-1;pendingImg=null;openBank()" class="btn bg-indigo-500">📚 題庫管理</button>
-          <button onclick="randQ()" class="btn bg-fuchsia-500">🎲 隨機出題</button>
-          <button onclick="openPick()" class="btn bg-purple-500">📋 選擇題目</button>
-          <button onclick="answer('ok')" class="btn bg-green-500">✅ 答對 +1</button>
-          <button onclick="answer('hard')" class="btn bg-emerald-600">🌟 難題答對 +2</button>
-          <button onclick="answer('bad')" class="btn bg-rose-500">❌ 答錯</button>
-          <button onclick="buzzer()" class="btn bg-orange-500">⚡ 搶答模式</button>
-          <button onclick="resetGame()" class="btn bg-gray-500">🔄 重新開始</button>
-          <button onclick="undo()" class="btn bg-amber-500">↩️ 返回上一步</button>
-          <button onclick="tigerManual(1)" class="btn bg-red-500">🐯 老虎前進 1 步</button>
-          <button onclick="tigerManual(-1)" class="btn bg-teal-500">🐯 老虎後退 1 步</button>
-        </div>
-        <div class="mt-3 text-center font-bold text-orange-700" id="wrongInfo"></div>
-      </section></main>
-</div>
 </div>
 
-<div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] bg-white border-4 border-orange-400 rounded-3xl shadow-2xl px-6 py-4 text-xl md:text-3xl font-black text-center"></div>
+<div id="tools" class="hidden fixed z-50 right-3 top-12 w-[min(92vw,380px)] max-h-[85vh] overflow-auto bg-white rounded-2xl shadow-2xl border border-stone-200 p-3">
+  <div class="grid grid-cols-2 gap-2">
+    <button onclick="toolDo(undo)" class="tl">↩️ 返回上一步</button>
+    <button onclick="toolDo(skipTurn)" class="tl">⏭️ 換下一位</button>
+    <button onclick="toolDo(()=>answer('hard'))" class="tl">🌟 難題答對 +2</button>
+    <button onclick="toolDo(buzzer)" class="tl">⚡ 搶答模式</button>
+    <button onclick="toolDo(()=>tigerManual(1))" class="tl">🐯 老虎前進 1 格</button>
+    <button onclick="toolDo(()=>tigerManual(-1))" class="tl">🐯 老虎後退 1 格</button>
+    <button onclick="toolDo(openPick)" class="tl">📋 選擇題目</button>
+    <button onclick="toolDo(()=>{editIdx=-1;pendingImg=null;openBank()})" class="tl">📚 題庫管理</button>
+    <button id="bRot" onclick="tglRot()" class="tl">🔁 輪流：開</button>
+    <button onclick="toolDo(resetGame)" class="tl">🔄 重新開始</button>
+  </div>
+  <div class="mt-3 pt-2 border-t border-stone-200 space-y-2 text-sm font-bold">
+    <div class="flex items-center gap-2 flex-wrap"><label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="tmChk" class="w-5 h-5" onchange="tmChange()"> ⏱️ 60 秒倒數</label><select id="tmMode" class="rounded-lg border border-stone-300 bg-white px-2 py-1"><option value="warn">時間到：只提醒</option><option value="bad">時間到：自動算答錯</option></select></div>
+    <div class="flex items-center gap-2 flex-wrap"><select id="mSel" onchange="setMusic(this.value)" class="rounded-lg border border-stone-300 bg-white px-2 py-1"><option value="off">🎵 音樂：關</option><option value="auto">🎵 自動（輕快→刺激）</option><option value="happy">🎵 輕快</option><option value="adv">🎵 冒險</option><option value="chase">🎵 刺激追逐</option></select><input type="range" id="mVol" min="0" max="100" value="50" oninput="setMVol(this.value)" class="w-24" title="音樂音量"></div>
+    <div class="flex items-center gap-2"><span>🗣️ 聲音</span><select id="vSel" onchange="setVoice(this.value)" class="rounded-lg border border-stone-300 bg-white px-2 py-1 max-w-[220px]"></select></div>
+  </div>
+</div>
+<div id="wrongInfo" class="hidden"></div>
+
+<div id="toast" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] bg-white border-2 border-orange-300 rounded-2xl shadow-2xl px-5 py-3 text-lg md:text-2xl font-bold text-center"></div>
 <div id="avPop" class="hidden fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this)closeAv()"><div id="avGrid" class="bg-white rounded-3xl p-4 grid grid-cols-5 gap-2 shadow-2xl max-w-full"></div></div>
 <div id="modal" class="hidden fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-3"><div id="mbox" class="bg-white rounded-3xl shadow-2xl p-5 w-full max-w-3xl max-h-[92vh] overflow-y-auto"></div></div>
 
 <script>
-const AV=['🐥','👦','👧','🐰','🐼','🐱','🐸','🦁','🦊','🐨','🦄','🐯','🐷'];let END=15,len=25,bonus=2;
-const DEF=[["15 + 8 = ?","23"],["27 + 36 = ?","63"],["45 + 19 = ?","64"],["38 + 24 = ?","62"],["50 - 17 = ?","33"],["72 - 28 = ?","44"],["91 - 35 = ?","56"],["100 - 64 = ?","36"],["小明有 18 顆糖，媽媽又給他 15 顆，現在共有幾顆？","33"],["書包裡有 42 枝筆，送給同學 19 枝，還剩幾枝？","23"],["樹上有 26 隻鳥，飛走 9 隻，還剩幾隻？","17"],["哥哥有 35 元，弟弟有 28 元，兩人共有多少元？","63"],["哪個比較大？ 78 和 87","87"],["哪個比較小？ 56 和 65","56"],["在 □ 填入 > 、< 或 =：49 □ 94","<"],["3 + 3 + 3 = ?（幾個 3 相加？）","9"],["2 × 4 = ?（4 個 2 相加）","8"],["5 × 3 = ?（3 個 5 相加）","15"],["每盤有 4 顆蘋果，3 盤共有幾顆？","12"],["每人分 2 塊餅乾，5 個人共需要幾塊？","10"]];
+const AV=['🐥','👦','👧','🐰','🐼','🐱','🐸','🦁','🦊','🐨','🦄','🐯','🐷'];let END=15,len=25,bonus=2,CFG={wrong:'5',patrol:'off',retreat:false,dice:false,cards:true};
+const UN=['第一單元 200以內的數','第二單元 二位數的直式加減','第三單元 量長度','第四單元 加減關係與應用','第五單元 面積的大小比較','學習加油站（一）'];
+const RAW=[
+[0,'活動1 數到200',[['接著數：118、119、( )','120'],['一個一個數：197 的後面是多少？','198'],['十個十個數：130、140、( )','150'],['五個五個數：85、90、( )','95'],['倒著數：152、151、( )','150'],['199 再多 1 是多少？','200'],['十個十個數：170、180、190、( )','200'],['148 的前面一個數是多少？','147']]],
+[0,'活動2 幾個百、幾個十、幾個一',[['1 個百、3 個十、5 個一，合起來是多少？','135'],['1 個百和 7 個十，合起來是多少？','170'],['168 的十位數字是多少？','6'],['175 的個位數字是多少？','5'],['143 的百位數字是多少？','1'],['10 個十是多少？','100'],['120 是 1 個百和幾個十？','2'],['156 ＝ 100 ＋ 50 ＋ ( )','6']]],
+[0,'活動3 使用錢幣',[['5 個 10 元，是多少元？','50'],['1 個 50 元、2 個 10 元、3 個 1 元，共幾元？','73'],['1 張 100 元和 1 個 50 元，共幾元？','150'],['1 個 100 元和 6 個 10 元，共幾元？','160'],['小美有 1 個 50 元，買一支 35 元的筆，還剩幾元？','15']]],
+[0,'活動4 比大小',[['哪個比較大？ 156 和 165','165'],['哪個比較小？ 187 和 178','178'],['在 □ 填入 > 、< 或 =：128 □ 182','<'],['在 □ 填入 > 、< 或 =：140 □ 100 + 40','='],['哪個數最大？ 138、183、118','183'],['哪個數最小？ 145、154、141','141'],['在 □ 填入 > 、< 或 =：199 □ 200','<']]],
+[1,'活動1 加法直式計算',[['23 + 45 = ?','68'],['36 + 52 = ?','88'],['47 + 25 = ?','72'],['38 + 24 = ?','62'],['56 + 37 = ?','93'],['29 + 48 = ?','77'],['65 + 28 = ?','93'],['74 + 18 = ?','92'],['45 + 45 = ?','90']]],
+[1,'活動2 減法直式計算',[['78 - 35 = ?','43'],['94 - 52 = ?','42'],['62 - 28 = ?','34'],['83 - 47 = ?','36'],['71 - 39 = ?','32'],['90 - 46 = ?','44'],['55 - 29 = ?','26'],['100 - 64 = ?','36']]],
+[1,'活動3 加加減減',[['25 + 30 - 18 = ?','37'],['48 - 19 + 26 = ?','55'],['36 + 27 - 40 = ?','23'],['70 - 25 + 18 = ?','63'],['小明有 35 顆彈珠，贏了 18 顆，又送給弟弟 20 顆，還有幾顆？','33'],['公車上有 42 人，下車 15 人，又上車 23 人，現在有幾人？','50']]],
+[2,'活動1 個別單位的測量',[['用同樣大的積木量，桌子長 9 個積木，鉛筆長 5 個積木，桌子比鉛筆長幾個積木？','4'],['用尺量長度的時候，要從尺的哪一個刻度開始量？','0','0,1,5,10'],['用一樣長的小棒量東西，小棒要頭尾接在一起，不可以留空隙，對不對？','對','對,不對']]],
+[2,'活動2 認識公分',[['尺上從 0 到 1 的一小格，長度是幾公分？','1'],['迴紋針大約長 3 ( )。','公分','公分,公尺']]],
+[2,'活動3 量長度',[['一條緞帶，從尺的 0 量到 12，長度是幾公分？','12'],['一枝筆，從尺的 3 量到 14，長度是幾公分？','11'],['一條線，從尺的 5 量到 17，長度是幾公分？','12']]],
+[2,'活動4 長度的加減',[['紅繩長 18 公分，藍繩長 25 公分，兩條繩子合起來長幾公分？','43'],['一條緞帶長 50 公分，剪掉 18 公分，還剩幾公分？','32'],['鉛筆長 16 公分，橡皮擦長 5 公分，鉛筆比橡皮擦長幾公分？','11'],['一條線長 35 公分，再接上 27 公分，共幾公分？','62']]],
+[3,'活動1 加減關係',[['8 + 5 = 13，所以 13 - 5 = ?','8'],['( ) + 7 = 15，括號裡是多少？','8'],['20 - ( ) = 12，括號裡是多少？','8'],['14 - 6 = 8，所以 8 + 6 = ?','14'],['31 - ( ) = 19，括號裡是多少？','12'],['( ) - 15 = 20，括號裡是多少？','35']]],
+[3,'活動2 用加減關係驗算',[['52 - 19 = 33，用加法驗算：33 + 19 = ?','52'],['34 + 28 = 62，用減法驗算：62 - 28 = ?','34'],['小明算 71 - 35 = 36，驗算：36 + 35 = ?','71'],['小美算 45 + 38 = 83，驗算：83 - 38 = ?','45']]],
+[3,'活動3 加減應用問題',[['小明有 18 顆糖，媽媽又給他 15 顆，現在共有幾顆？','33'],['書包裡有 42 枝筆，送給同學 19 枝，還剩幾枝？','23'],['樹上有 26 隻鳥，飛走 9 隻，還剩幾隻？','17'],['哥哥有 35 元，弟弟有 28 元，兩人共有多少元？','63'],['全班有 28 人，其中女生 13 人，男生有幾人？','15'],['圖書館有 56 本故事書，借出 27 本後，又還回 15 本，現在有幾本？','44'],['小華有 45 張貼紙，比小美多 12 張，小美有幾張？','33'],['小花有 28 元，要買一個 50 元的玩具，還差幾元？','22']]],
+[3,'活動2 用加減關係驗算',[['73 - 48 = ?','25'],['90 - 62 = ?','28'],['85 - 37 = ?','48'],['61 - 54 = ?','7'],['76 - 48 = ?','28'],['51 - 14 = ?','37'],['63 - 47 = ?','16'],['82 - 57 = ?','25'],['小凱算 69 - 18 = 51，用加法驗算：51 + 18 = ?','69'],['小凱算 80 - 37 = 43，用加法驗算：43 + 37 = ?','80'],['小安算 43 - 27 = 16，用加法驗算：16 + 27 = ?','43'],['小玲算 21 + 30 = 51，用減法驗算：51 - 30 = ?','21'],['小玲算 55 + 31 = 86，用減法驗算：86 - 31 = ?','55'],['小安算 29 + 39 = 68，用減法驗算：68 - 39 = ?','29'],['阿傑算 57 - 44 = 13，驗算：13 + 44 = 57，這題算對了嗎？','算對了','算對了,算錯了'],['阿傑算 91 - 22 = 69，驗算：69 + 22 = 91，這題算對了嗎？','算對了','算對了,算錯了'],['小凱算 69 - 41 = 38，驗算：38 + 41 = 79，這題算對了嗎？','算錯了','算對了,算錯了'],['阿宏算 49 - 38 = 21，驗算：21 + 38 = 59，這題算對了嗎？','算錯了','算對了,算錯了']],true],
+[3,'活動3 加減應用問題（加減數未知）',[['小宇有 38 元，奶奶給小宇一些錢後，小宇現在有 65 元。奶奶給了小宇多少元？','27'],['媽媽在市場買了一把青菜 26 元和一袋水果，共付給老闆 81 元。這袋水果多少元？','55'],['安安有 72 張卡片，送給表弟一些後，剩下 49 張。安安送給表弟幾張卡片？','23'],['麵包店早上做了 93 個麵包，中午賣掉一些後，剩下 58 個。中午賣掉幾個麵包？','35'],['小琪現在有 87 元，想買一個書包，還不夠 24 元。這個書包賣幾元？','111'],['阿傑有 40 元，小凱給阿傑一些錢後，阿傑現在有 72 元。小凱給了多少元？','32'],['小美有 43 元，小玲給小美一些錢後，小美現在有 74 元。小玲給了多少元？','31'],['小明有 41 元，小雯給小明一些錢後，小明現在有 55 元。小雯給了多少元？','14'],['小美有 49 張貼紙，送給阿宏一些後，剩下 25 張。送給阿宏幾張？','24'],['阿傑有 68 顆彈珠，送給小玲一些後，剩下 53 顆。送給小玲幾顆？','15'],['阿宏有 58 本故事書，送給小雯一些後，剩下 36 本。送給小雯幾本？','22'],['小雯有一些氣球，用掉 28 個後，還剩下 29 個。小雯原來有幾個？','57'],['小雯有一些鉛筆，用掉 18 枝後，還剩下 42 枝。小雯原來有幾枝？','60'],['小明有一些鉛筆，用掉 14 枝後，還剩下 52 枝。小明原來有幾枝？','66'],['小凱買了一個 40 元的麵包和一瓶飲料，共付 74 元。這瓶飲料多少元？','34'],['小雯買了一個 46 元的布丁和一瓶飲料，共付 70 元。這瓶飲料多少元？','24'],['小安買了一個 38 元的飯糰和一瓶飲料，共付 75 元。這瓶飲料多少元？','37'],['小玲有 81 元，想買一個玩具，還差 37 元。這個玩具賣多少元？','118'],['小明有 60 元，想買一個玩具，還差 13 元。這個玩具賣多少元？','73'],['小玲有 54 元，想買一個玩具，還差 31 元。這個玩具賣多少元？','85']],true],
+[3,'活動3 加減應用問題',[['糖果罐裡有 38 顆草莓糖和 47 顆牛奶糖，糖果罐裡共有多少顆糖？','85'],['小倩有 54 張郵票，阿志比小倩多 29 張，阿志有幾張郵票？','83'],['弟弟有 46 元，哥哥比弟弟多 7 元，哥哥有多少元？','53'],['阿龍有 84 元，買了一本 36 元的筆記本，還剩下多少元？','48'],['毛毛有 63 元，小睿比毛毛少 9 元，小睿有幾元？','54'],['姑姑有 32 個橘子，分給鄰居 15 個，姑姑還剩下幾個橘子？','17'],['小宇有 71 張色卡，做勞作用掉了 26 張，還剩下幾張色卡？','45'],['安安原本有 48 元，爺爺又給他 35 元後，他現在有幾元？','83'],['哥哥收集了 58 顆彈珠，弟弟收集了 8 顆，兩個人共有多少顆彈珠？','66'],['哥哥昨天存了 58 元，今天比昨天多存了 26 元，今天存了多少元？','84'],['一個玉米賣 35 元，一個地瓜賣 42 元，奶奶各買一個，共要付幾元？','77'],['公園裡有 85 隻麻雀和 38 隻鴿子，麻雀比鴿子多幾隻？','47'],['阿德有 52 張貼紙，小倩比阿德少 17 張，小倩有幾張貼紙？','35'],['書櫃裡有 91 本書，借走 47 本，還剩幾本？','44'],['一個漢堡賣 78 元，一杯紅茶賣 46 元，漢堡比紅茶貴幾元？','32']],true],
+[4,'活動1 面積的直接比較',[['兩張紙疊在一起，露出比較多的那一張，面積比較( )。','大','大,小'],['甲長方形整個蓋在乙長方形裡面，哪一個的面積比較大？','乙','甲,乙']]],
+[4,'活動2 面積的間接比較',[['兩張桌子不能搬在一起疊著比，可以怎麼比面積？','用一張紙剪出形狀來比','用一張紙剪出形狀來比,用手猜猜看,看顏色'],['甲和丙一樣大，丙比乙大，所以甲和乙哪個比較大？','甲','甲,乙']]],
+[4,'活動3 面積的個別單位比較',[['用同樣大的小方格鋪：A 用 18 格，B 用 16 格，哪一個的面積比較大？','A','A,B'],['甲圖形有 12 個方格，乙圖形有 15 個方格，哪一個的面積比較大？','乙','甲,乙'],['用同樣大的小方格量，桌面有 24 格，書本有 9 格，桌面比書本多幾格？','15'],['每個小方格大小都一樣，丙有 20 格，丁有 20 格，面積怎麼樣？','一樣大','一樣大,丙比較大,丁比較大'],['紅色有 17 格，藍色有 23 格，兩種顏色合起來共有幾格？','40']]],
+[5,'複習',[['100 + 60 + 4 = ?','164'],['99 + 1 = ?','100'],['120 - 20 = ?','100'],['58 + 27 = ?','85'],['81 - 36 = ?','45'],['( ) + 25 = 60，括號裡是多少？','35'],['哪個比較大？ 143 和 134','143']]]
+];
+function opts4(ans,xy){
+  const x=xy[0]||0,y=xy[1]||0,sum=x+y,diff=Math.abs(x-y),isSub=ans===diff,len=Math.max(String(x).length,String(y).length);
+  const col=()=>{const A=String(Math.max(x,y)).padStart(len,'0'),B=String(Math.min(x,y)).padStart(len,'0');return +A.split('').map((d,i)=>Math.abs(d-B[i])).join('')};
+  const c=isSub?[sum<=130?sum:ans+20,col(),ans+10,ans-10,ans+1,ans-1,ans+2]:[diff>=10?diff:ans-20,ans-10,ans+10,ans+1,ans-1,ans+2,ans-2];
+  const out=[];for(const v of c){if(v>0&&v!==ans&&!out.includes(v))out.push(v);if(out.length===3)break}
+  return [ans,...out].join(',');
+}
+const mkDef=()=>RAW.flatMap(([u,act,L,fx])=>L.map(([q,a,o])=>[q,a,'',o||(fx?opts4(+a,(String(q).match(/\d+/g)||[]).slice(0,2).map(Number)):''),UN[u]+' '+act]));
+const DEF=mkDef();
+const OLDQ=new Set(["15 + 8 = ?","27 + 36 = ?","45 + 19 = ?","38 + 24 = ?","50 - 17 = ?","72 - 28 = ?","91 - 35 = ?","100 - 64 = ?","小明有 18 顆糖，媽媽又給他 15 顆，現在共有幾顆？","書包裡有 42 枝筆，送給同學 19 枝，還剩幾枝？","樹上有 26 隻鳥，飛走 9 隻，還剩幾隻？","哥哥有 35 元，弟弟有 28 元，兩人共有多少元？","哪個比較大？ 78 和 87","哪個比較小？ 56 和 65","在 □ 填入 > 、< 或 =：49 □ 94"]);
+const MULRE=/×|乘|相加|每盒有|每盤有|每人分|來算）/;
+const WSRE=/皮皮|丹丹|香香|美美|奇奇|小亞|小嘉|蛋黃酥|恐龍卡|蝴蝶|蜻蜓|甜柿|水梨|奶茶|笑臉|烘焙坊|摺紙鶴|餅乾盒|超商|生態園|冰箱裡有 72|姐姐昨天存|哥哥有 25 顆|妹妹有 37 元|妹妹原本有 37|姐姐有 53|果汁賣 83|鮮奶賣 84/;
+const OLDV=new Set(['64 - 39 = ?','80 - 71 = ?','92 - 56 = ?','56 - 48 = ?']);
 let bank=DEF.map(x=>x.slice()),S=[],tiger=0,wrong=0,cur=null,showA=false,sound=true,speak=true,over=false,sel=new Set(),n=6;
 let D=Array.from({length:8},(_,i)=>({name:'小朋友'+(i+1),av:AV[i]}));
 try{const b=JSON.parse(localStorage.getItem('mtc_bank')||'null');if(Array.isArray(b)&&b.length)bank=b}catch(e){}
-try{const d=JSON.parse(localStorage.getItem('mtc_d')||'null');if(d&&Array.isArray(d.D)&&d.D.length===8){D=d.D;n=d.n;if([15,25,35,45].includes(d.len))len=d.len;if([0,1,2].includes(d.bonus))bonus=d.bonus}}catch(e){}
+try{const d=JSON.parse(localStorage.getItem('mtc_d')||'null');if(d&&Array.isArray(d.D)&&d.D.length===8){D=d.D;n=d.n;if([15,25,35,45].includes(d.len))len=d.len;if([0,1,2].includes(d.bonus))bonus=d.bonus;if(d.cfg){Object.assign(CFG,d.cfg);if(!('wrong' in d.cfg))CFG.patrol='off'}}}catch(e){}
+try{
+  if(localStorage.getItem('mtc_mig')!=='v6'){
+    let b=JSON.parse(localStorage.getItem('mtc_bank')||'null');
+    if(Array.isArray(b)){b=b.filter(q=>!OLDQ.has(q[0])&&!OLDV.has(q[0])&&!MULRE.test(String(q[0]))&&!WSRE.test(String(q[0])));const have=new Set(b.map(q=>q[0]));bank=b.concat(mkDef().filter(q=>!have.has(q[0])))}else bank=mkDef();
+    localStorage.setItem('mtc_bank',JSON.stringify(bank));localStorage.setItem('mtc_mig','v6');
+  }
+}catch(e){}
 const fixItem=q=>{const m=String(q[0]).split(/[|｜]/);if(m.length>=2&&!q[1]){q[0]=m[0].trim();q[1]=m[1].trim();if(m[2]&&!q[3])q[3]=m[2].trim()}return q};
 bank=bank.map(fixItem);
 const $=id=>document.getElementById(id);
@@ -155,6 +236,8 @@ const SFX={
   roar:()=>{tone(90,.8,'sawtooth',0,.3,40);tone(140,.7,'square',.05,.14,60);tone(60,.9,'sawtooth',.1,.25,30)},
   scream:()=>{tone(1500,.6,'sawtooth',0,.1,600);tone(1900,.5,'triangle',.05,.08,800);tone(1300,.4,'sawtooth',.3,.08,500)},
   thump:()=>{tone(70,.18,'sine',0,.4,40);tone(70,.18,'sine',.26,.4,40)},
+  card:()=>[659,880,1175,1568].forEach((f,i)=>tone(f,.18,'triangle',i*.09,.12)),
+  cardBad:()=>{tone(300,.25,'sawtooth',0,.1,200);tone(200,.4,'sawtooth',.18,.1,110)},
   boom:()=>{tone(90,.5,'sine',0,.4,35);noise(.5,0,.3,700,'lowpass')},
   crackle:()=>{for(let i=0;i<10;i++)noise(.05,.12+i*.06+Math.random()*.05,.1,4000,'highpass')},
   applause:()=>{for(let i=0;i<34;i++)noise(.08,i*.09+Math.random()*.05,.09,2500+Math.random()*2000,'bandpass')},
@@ -162,6 +245,76 @@ const SFX={
   lose:()=>{SFX.roar();noise(.7,0,.25,300,'lowpass');noise(1.2,.9,.07,500,'bandpass');[[392,.8],[370,1.25],[349,1.7]].forEach(([f,t])=>{tone(f,.4,'sawtooth',t,.12);tone(f*1.005,.4,'square',t,.05)});tone(330,1.4,'sawtooth',2.2,.14,180);tone(60,.6,'sine',3.5,.3,30)},
   win:()=>{SFX.drum();setTimeout(()=>{[523,523,523,659,784,659,784,1047].forEach((f,i)=>{tone(f,.28,'triangle',i*.14,.14);tone(f/2,.28,'sawtooth',i*.14,.05)});[1047,1319,1568,2093].forEach((f,i)=>tone(f,.3,'sine',1.3+i*.12,.12));SFX.applause()},900)}
 };
+/* ---------- 背景音樂（合成） ---------- */
+const MN=m=>440*Math.pow(2,(m-69)/12);
+const MT={
+  happy:{bpm:112,sub:2,w:'triangle',bw:'sine',mv:.07,
+    mel:[72,76,79,76,72,76,79,0,74,77,81,77,74,77,79,0,76,79,83,79,72,76,79,76,74,77,79,74,72,0,72,0],
+    bas:[48,48,53,53,55,55,48,48]},
+  adv:{bpm:126,sub:2,w:'square',bw:'triangle',mv:.04,
+    mel:[69,0,72,69,76,0,72,0,74,0,77,74,81,0,77,0,76,0,79,76,83,0,79,0,77,76,74,72,71,0,69,0],
+    bas:[45,45,41,41,43,43,45,45]},
+  chase:{bpm:152,sub:4,w:'sawtooth',bw:'sawtooth',mv:.035,
+    mel:[0,0,81,0,0,0,80,0,0,0,77,0,0,0,76,0,0,0,81,0,0,0,84,0,83,0,81,0,80,0,77,0],
+    bas:[38,38,0,38,38,0,50,0,38,38,0,38,38,0,50,0,41,41,0,41,41,0,53,0,40,40,0,40,40,0,52,0]}
+};
+let mu={mode:'off',cur:'happy',timer:null,next:0,step:0},mg=null,mVol=.5,nb=null,dkT=null;
+function acx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();return ac}
+function mnote(f,t,d,type,v){
+  const c=ac,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(mg);o.start(t);o.stop(t+d+.02);
+}
+function mnz(t,d,v,f,type){
+  const c=ac,s=c.createBufferSource(),fl=c.createBiquadFilter(),g=c.createGain();
+  s.buffer=nb;fl.type=type;fl.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  s.connect(fl);fl.connect(g);g.connect(mg);s.start(t);s.stop(t+d);
+}
+function mkick(t){
+  const c=ac,o=c.createOscillator(),g=c.createGain();
+  o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
+  g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.0001,t+.15);
+  o.connect(g);g.connect(mg);o.start(t);o.stop(t+.16);
+}
+function mstep(trk,step,t){
+  const T=MT[trk],i=step%32,sd=60/T.bpm/T.sub,m=T.mel[i];
+  if(m)mnote(MN(m),t,sd*1.7,T.w,T.mv);
+  let b=0;
+  if(T.bas.length===8){const r=T.bas[i>>2];if(i%4===0)b=r;else if(i%4===2)b=r+12}else b=T.bas[i];
+  if(b)mnote(MN(b),t,sd*1.5,T.bw,.09);
+  if(T.sub===2){if(i%4===0)mkick(t);if(i%2===1)mnz(t,.04,.05,7000,'highpass');if(i%8===4)mnz(t,.1,.07,1800,'bandpass')}
+  else{if(i%8===0||i%8===5)mkick(t);if(i%8===4)mnz(t,.1,.08,1800,'bandpass');mnz(t,.03,.04,7000,'highpass')}
+}
+const tigerClose=()=>!over&&S.length&&(S.some(s=>s.pos>=tiger&&s.pos-tiger<=2)||tiger>=END-3);
+const musicPick=()=>mu.mode==='auto'?(tigerClose()?'chase':'happy'):mu.mode;
+function musicTick(){
+  if(!ac)return;
+  while(mu.next<ac.currentTime+.35){
+    mstep(mu.cur,mu.step,mu.next);
+    mu.next+=60/MT[mu.cur].bpm/MT[mu.cur].sub;mu.step++;
+    if(mu.step%32===0)mu.cur=musicPick();
+  }
+}
+function musicStop(){clearInterval(mu.timer);mu.timer=null}
+function musicStart(){
+  if(mu.mode==='off'||!sound)return;
+  try{
+    const c=acx();
+    if(!mg){mg=c.createGain();mg.connect(c.destination)}
+    mg.gain.value=mVol;
+    if(!nb){nb=c.createBuffer(1,c.sampleRate,c.sampleRate);const a=nb.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}
+    clearInterval(mu.timer);mu.cur=musicPick();mu.step=0;mu.next=c.currentTime+.15;
+    mu.timer=setInterval(musicTick,100);
+  }catch(e){}
+}
+function saveMusic(){try{localStorage.setItem('mtc_music',JSON.stringify({mode:mu.mode,vol:mVol}))}catch(e){}}
+function setMusic(v){mu.mode=v;saveMusic();if(v==='off')musicStop();else musicStart();sfx('click')}
+function setMVol(v){mVol=v/100;if(mg&&ac)mg.gain.value=mVol;saveMusic()}
+function duckFor(t){
+  if(mg&&ac)mg.gain.setTargetAtTime(mVol*.3,ac.currentTime,.08);
+  clearTimeout(dkT);
+  dkT=setTimeout(()=>{if(mg&&ac)mg.gain.setTargetAtTime(mVol,ac.currentTime,.2)},Math.min(12000,500+String(t).length*240));
+}
 const sfx=k=>SFX[k]&&SFX[k]();
 
 /* ---------- 語音 (zh-TW) ---------- */
@@ -169,7 +322,7 @@ const rd=t=>String(t).replace(/[\uE000\uE001]/g,'').replace(/\+/g,' 加 ').repla
 function say(t){
   if(!speak||!('speechSynthesis' in window))return;
   try{
-    speechSynthesis.cancel();
+    speechSynthesis.cancel();duckFor(t);
     const v=getVoice();
     speakFix(String(t)).replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{2BFF}\u{FE00}-\u{FE0F}\u200D]/gu,'').replace(/[（）()「」『』【】《》~～*＊#]/g,' ').split(/[。\n]/).forEach(seg=>{
       const pn=seg.includes('‼');
@@ -228,19 +381,25 @@ function tgl(k){
   if(k==='sound')sound=!sound;else{speak=!speak;if(!speak&&window.speechSynthesis)speechSynthesis.cancel()}
   $('bSnd').textContent=sound?'🔊 音效開':'🔇 音效關';
   $('bSpk').textContent=speak?'🗣️ 朗讀開':'🤐 朗讀關';
+  if(k==='sound'){if(!sound)musicStop();else musicStart()}
   sfx('click');
 }
 let tt;
-function toast(t,voice){
-  const e=$('toast');e.textContent=String(t).replace(/‼/g,'');e.classList.remove('hidden');
-  e.style.animation='none';void e.offsetWidth;e.style.animation='';
-  clearTimeout(tt);tt=setTimeout(()=>e.classList.add('hidden'),4200);
-  if(voice!==false)say(voice||t.replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF]/gu,''));
+function toast(t,voice,evs){
+  const e=$('toast'),main=String(t).replace(/‼/g,'');
+  e.innerHTML=esc(main)+(evs&&evs.length?`<div class="mt-2 flex flex-wrap justify-center gap-2" style="white-space:normal">${evs.slice(0,4).map(x=>`<span class="rounded-full bg-orange-100 px-3 py-1 text-base md:text-xl font-bold text-orange-700">${esc(String(x).replace(/‼/g,''))}</span>`).join('')}</div>`:'');
+  e.classList.remove('hidden');e.style.animation='none';void e.offsetWidth;e.style.animation='';
+  const sp=voice===false?'':(voice||main);
+  const cl=String(sp).replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{2BFF}\u{FE00}-\u{FE0F}\u200D‼]/gu,'').length;
+  const dur=Math.min(15000,Math.max(3500,1800+cl*(speak&&sp?260:130)));
+  clearTimeout(tt);tt=setTimeout(()=>e.classList.add('hidden'),dur);
+  if(voice!==false)say(sp);
+  return dur;
 }
 
 /* ---------- 畫面 ---------- */
 const RING={16:[5,5],26:[8,7],36:[11,9],46:[14,11]};
-const TILE=['#fecaca','#fed7aa','#fef08a','#bbf7d0','#bfdbfe','#ddd6fe','#fbcfe8'];
+const TILE=['#fde8e8','#fdf0dc','#fdf7d3','#e2f6e3','#e0edfd','#ebe6fb','#fce6f1'];
 function cellXY(k,w,h){
   if(k<h)return[h-1-k,0];
   if(k<h+w-1)return[0,k-h+1];
@@ -249,31 +408,32 @@ function cellXY(k,w,h){
 }
 function drawBoard(){
   const[w,h]=RING[END+1]||[8,7];
-  let b=`<div style="display:grid;grid-template-columns:repeat(${w},1fr);grid-template-rows:repeat(${h},1fr);gap:4px;aspect-ratio:${w}/${h};width:min(100%,calc(82vh*${w}/${h}));margin:0 auto">`;
+  let b=`<div style="display:grid;grid-template-columns:repeat(${w},1fr);grid-template-rows:repeat(${h},1fr);gap:4px;aspect-ratio:${w}/${h};width:100%;width:min(100cqw,calc(100cqh*${w}/${h}));margin:0 auto">`;
   for(let k=0;k<=END;k++){
     const[r,c]=cellXY(k,w,h),here=S.filter(s=>s.pos===k);
     const bg=k===0?'#fdba74':k===END?'#fde047':TILE[k%TILE.length];
     const lbl=k===0?'🐯窩':k===1?'起點':k===END?'終點🏁':k;
+    const sp=CFG.cards?specAt(k):'';
     const items=(tiger===k?[{av:'🐯',name:'老虎',t:1}]:[]).concat(here);
     const nI=items.length,cc=nI<=1?1:nI<=4?2:3,rr=Math.max(1,Math.ceil(nI/cc));
     const av=`clamp(14px,min(${(100/cc*.6).toFixed(1)}cqw,${(86/rr*.5).toFixed(1)}cqh),52px)`,nm=`clamp(8px,min(${(100/cc*.2).toFixed(1)}cqw,${(86/rr*.16).toFixed(1)}cqh),20px)`;
-    b+=`<div style="grid-column:${c+1};grid-row:${r+1};background:${bg};container-type:size" class="relative rounded-xl border-2 border-white shadow overflow-hidden"><span class="absolute top-0 left-0 font-black text-gray-800 bg-white/70 rounded-br-lg px-1.5 leading-tight z-10" style="font-size:clamp(12px,1.5vw,24px)">${lbl}</span><div style="position:absolute;inset:0;padding-top:13cqh;display:grid;grid-template-columns:repeat(${cc},1fr);align-content:center;justify-items:center;align-items:center">${items.map(s=>`<div class="text-center leading-none ${s.t?'pop':''}" style="max-width:100%"><div style="font-size:14px;font-size:${av}">${s.av}</div><div class="font-bold" style="white-space:nowrap;font-size:9px;font-size:${nm}">${s.t?'':esc(s.name)}</div></div>`).join('')}</div></div>`;
+    b+=`<div style="grid-column:${c+1};grid-row:${r+1};background:${bg};container-type:size" class="relative rounded-xl border-2 border-white shadow overflow-hidden ${sp?'ring-4 ring-purple-400':''}"><span class="absolute top-0 left-0 font-black text-gray-800 bg-white/70 rounded-br-lg px-1.5 leading-tight z-10" style="font-size:clamp(12px,1.5vw,24px)">${lbl}</span>${sp?`<span class="absolute bottom-0 right-1 z-10" style="font-size:clamp(14px,2vw,30px)">${sp==='fate'?'🎴':'🎁'}</span>`:''}<div style="position:absolute;inset:0;padding-top:13cqh;display:grid;grid-template-columns:repeat(${cc},1fr);align-content:center;justify-items:center;align-items:center">${items.map(s=>`<div class="text-center leading-none ${s.t?'pop':''}" style="max-width:100%"><div style="font-size:14px;font-size:${av}">${s.av}</div><div class="font-bold" style="white-space:nowrap;font-size:9px;font-size:${nm}">${s.t?'':(s.skip?'⏸️':'')+esc(s.name)}</div></div>`).join('')}</div></div>`;
   }
-  const chips=S.map(s=>`<div class="rounded-xl bg-white/80 px-1 py-0.5 text-center leading-tight ${rot&&S[turn]===s?'ring-4 ring-orange-400':''}"><div style="font-size:clamp(13px,1.6vw,24px)">${s.av} <b style="font-size:clamp(10px,1.05vw,16px)">${esc(s.name)}</b></div><div class="font-bold" style="font-size:clamp(9px,1vw,15px)">📍${s.pos} ⭐${s.stars} 🛡️${s.shields} 🔥${s.streak}</div></div>`).join('');
-  b+=`<div style="grid-column:2/${w};grid-row:2/${h}" class="rounded-2xl bg-gradient-to-br from-yellow-100 to-pink-100 border-4 border-white flex flex-col items-center justify-center text-center p-1 overflow-auto gap-1"><div class="font-black text-orange-600" style="font-size:clamp(12px,1.7vw,26px)">🐯 老虎在第 ${tiger} 格　答錯 ${'🔴'.repeat(wrong%2)}${'⚪'.repeat(2-wrong%2)}</div>${rot&&S.length?`<div class="font-black text-sky-700" style="font-size:clamp(12px,1.7vw,26px)">👉 輪到 ${S[turn].av} ${esc(S[turn].name)}</div>`:''}<div class="grid grid-cols-2 xl:grid-cols-4 gap-1 w-full">${chips}</div></div></div>`;
+  const chips=S.map(s=>`<div class="rounded-xl bg-white/80 px-1 py-0.5 text-center leading-tight ${rot&&S[turn]===s?'ring-4 ring-orange-400':''}"><div style="font-size:clamp(13px,1.6vw,24px)">${s.av} <b style="font-size:clamp(10px,1.05vw,16px)">${s.skip?'⏸️':''}${esc(s.name)}</b></div><div class="font-bold" style="font-size:clamp(9px,1vw,15px)">📍${s.pos} ⭐${s.stars} 🛡️${s.shields} 🔥${s.streak}</div></div>`).join('');
+  b+=`<div style="grid-column:2/${w};grid-row:2/${h}" class="rounded-xl bg-stone-50 border border-stone-200 flex flex-col items-center justify-center text-center p-1 overflow-auto gap-1"><div class="font-black text-orange-600" style="font-size:clamp(12px,1.6vw,24px)">🐯 老虎在第 ${tiger} 格</div><div class="font-bold text-stone-600" style="font-size:clamp(10px,1.2vw,18px)">${CFG.wrong==='old'?'答錯 '+'🔴'.repeat(wrong%2)+'⚪'.repeat(2-wrong%2)+'（滿 2 題老虎前進）':'答錯一題，老虎衝 '+CFG.wrong+' 格'}</div>${rot&&S.length?`<div class="font-black text-sky-700" style="font-size:clamp(12px,1.7vw,26px)">👉 輪到 ${S[turn].av} ${esc(S[turn].name)}</div>`:''}<div class="text-stone-500" style="font-size:clamp(9px,1vw,14px)">📍位置 ⭐星星 🛡️護盾 🔥連對${CFG.cards?'　🎴命運 🎁機會':''}</div><div class="grid grid-cols-2 xl:grid-cols-4 gap-1 w-full">${chips}</div></div></div>`;
   $('board').innerHTML=b;
 }
 function render(){
   drawBoard();
-  $('picks').innerHTML=S.map((s,i)=>`<label class="flex items-center gap-2 px-3 py-2 rounded-2xl border-4 cursor-pointer text-xl font-black ${sel.has(i)?'bg-yellow-200 border-orange-400':'bg-white border-gray-200'}"><input type="checkbox" class="w-6 h-6" ${sel.has(i)?'checked':''} onchange="tp(${i})"><span>${s.av} ${esc(s.name)}</span></label>`).join('');
+  $('picks').innerHTML=S.map((s,i)=>`<label class="flex items-center gap-2 px-2 py-1 rounded-lg border-2 cursor-pointer text-base font-bold ${sel.has(i)?'bg-amber-100 border-amber-400':'bg-white border-stone-200'}"><input type="checkbox" class="w-5 h-5" ${sel.has(i)?'checked':''} onchange="tp(${i})"><span>${s.av} ${esc(s.name)}</span></label>`).join('');
   $('turnBar').innerHTML=over?'🏁 比賽結束！按「🔄 重新開始」再玩一次':rot&&S.length?`👉 輪到 ${S[turn].av} ${esc(S[turn].name)}${turnN?'　🔥 答對了，再答一題！':''}`:'';
   $('wrongInfo').textContent=`老虎位置：第 ${tiger} 格　｜　全班答錯累積：${wrong%2}/2（滿 2 題老虎前進 1 步）`;
-  $('qtext').innerHTML=cur?`<div class="leading-[2] text-center">${qHtml(cur[0])}</div>${cur[2]?`<img src="${cur[2]}" onclick="bigImg()" class="mx-auto mt-3 max-h-[42vh] rounded-xl border-4 border-white shadow cursor-zoom-in">`:''}`:'按「🎲 隨機出題」開始！';
+  $('qtext').innerHTML=cur?`<div class="leading-[2] text-center">${qHtml(cur[0])}</div>${cur[2]?`<img src="${cur[2]}" onclick="bigImg()" class="mx-auto mt-3 max-h-[26vh] rounded-xl border border-stone-200 shadow cursor-zoom-in self-center">`:''}`:'按「🎲 出題」開始！';
   $('qans').textContent=cur&&showA?'答案：'+cur[1]:'';
   $('opts').innerHTML=mc&&O?O.list.map((o,i)=>{
     let c='bg-white border-sky-300 text-sky-700';
     if(O.picked!==null)c=o===O.ans?'bg-green-400 border-green-600 text-white':i===O.picked?'bg-rose-400 border-rose-600 text-white':'bg-gray-100 border-gray-200 text-gray-400';
-    return `<button ${O.picked!==null?'disabled':''} onclick="pick(${i})" class="rounded-3xl border-4 ${c} text-4xl md:text-6xl font-black py-5 md:py-8 shadow-lg active:scale-95 transition">${'ABCD'[i]}　${esc(o)}</button>`}).join('')
+    return `<button ${O.picked!==null?'disabled':''} onclick="pick(${i})" class="rounded-2xl border-2 ${c} font-black shadow active:scale-95 transition" style="font-size:clamp(1.4rem,3vw,3rem);padding:clamp(.5rem,1.6vh,1.3rem) .5rem">${'ABCD'[i]}　${esc(o)}</button>`}).join('')
     :(mc&&cur?'<div class="col-span-2 text-center text-gray-500 font-bold">此題沒有選項，請用下方按鈕判定</div>':'');
 }
 function tp(i){sel.has(i)?sel.delete(i):sel.add(i);sfx('click');render()}
@@ -283,27 +443,76 @@ function selNone(){sel.clear();sfx('click');render()}
 /* ---------- 題目 ---------- */
 const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,P=a=>a[R(0,a.length-1)];
 const ITEMS=[['顆','糖果'],['枝','鉛筆'],['張','貼紙'],['個','氣球'],['本','故事書'],['朵','花']];
+const MIX=['add','sub','cmp','word','place','money','len','rel','area','unk','chk'];
+function pickNm(){
+  const ex=new Set([...sel]);if(rot&&S.length)ex.add(turn);
+  let pool=SH(S.filter((_,i)=>!ex.has(i)).map(s=>s.name));if(!pool.length)pool=['小明'];
+  const M='\uE000',E='\uE001';return[M+pool[0]+E,pool.length>1?M+pool[1]+E:'朋友'];
+}
+const mq=(q,a,xy)=>[q,String(a),'',opts4(a,xy)];
 const GEN={
   add(){const a=R(11,79),b=R(5,Math.min(40,99-a));return[`${a} + ${b} = ?`,String(a+b)]},
   sub(){const a=R(30,99),b=R(5,a-5);return[`${a} - ${b} = ?`,String(a-b)]},
-  cmp(){let x=R(10,99),y=R(10,99);while(x===y)y=R(10,99);const big=Math.random()<.5;return[`哪個比較${big?'大':'小'}？ ${x} 和 ${y}`,String(big?Math.max(x,y):Math.min(x,y))]},
-  mul(){const a=R(2,6),b=R(2,5);return[`${a} × ${b} = ?（${b} 個 ${a} 相加）`,String(a*b)]},
+  cmp(){
+    if(Math.random()<.35){const st=new Set();while(st.size<3)st.add(R(100,199));const l=[...st],big=Math.random()<.5;return[`哪個數最${big?'大':'小'}？ ${l.join('、')}`,String(big?Math.max(...l):Math.min(...l))]}
+    let x=R(10,199),y=R(10,199);while(x===y)y=R(10,199);const big=Math.random()<.5;
+    return[`哪個比較${big?'大':'小'}？ ${x} 和 ${y}`,String(big?Math.max(x,y):Math.min(x,y))]},
+  place(){
+    const t=R(0,9),o=R(0,9),n=100+t*10+o,k=R(0,3);
+    if(k===0)return[`1 個百、${t} 個十、${o} 個一，合起來是多少？`,String(n)];
+    if(k===1)return[`${n} 的十位數字是多少？`,String(t)];
+    if(k===2)return[`${n} 的個位數字是多少？`,String(o)];
+    const m=R(10,17)*10;return[`十個十個數：${m}、${m+10}、( )`,String(m+20)]},
+  money(){
+    const a=R(0,1),b=R(0,1),c=R(1,a&&b?4:9),d=R(0,9),ps=[];
+    if(a)ps.push('1 個 100 元');if(b)ps.push('1 個 50 元');ps.push(`${c} 個 10 元`);if(d)ps.push(`${d} 個 1 元`);
+    return[`${ps.join('、')}，共幾元？`,String(a*100+b*50+c*10+d)]},
+  len(){
+    const nm=P(['鉛筆','緞帶','繩子','鐵絲']),k=R(0,3);
+    if(k===0){const a=R(10,40),b=R(5,35);return[`${nm}長 ${a} 公分，再接上 ${b} 公分，共幾公分？`,String(a+b)]}
+    if(k===1){const a=R(30,80),b=R(5,a-5);return[`${nm}長 ${a} 公分，剪掉 ${b} 公分，還剩幾公分？`,String(a-b)]}
+    if(k===2){const a=R(10,25),b=R(2,a-3);return[`${nm}長 ${a} 公分，橡皮擦長 ${b} 公分，${nm}比橡皮擦長幾公分？`,String(a-b)]}
+    const s0=R(0,6),e=s0+R(5,14);return[`${nm}從尺的 ${s0} 量到 ${e}，長度是幾公分？`,String(e-s0)]},
+  rel(){
+    const a=R(8,60),b=R(5,40),c=a+b,k=R(0,3);
+    if(k===0)return[`( ) + ${b} = ${c}，括號裡是多少？`,String(a)];
+    if(k===1)return[`${c} - ( ) = ${a}，括號裡是多少？`,String(b)];
+    if(k===2)return[`${a} + ${b} = ${c}，所以 ${c} - ${b} = ?`,String(a)];
+    return[`${c} - ${b} = ${a}，用加法驗算：${a} + ${b} = ?`,String(c)]},
+  unk(){
+    const[n1,n2]=pickNm(),k=R(0,4),a=R(21,59),b=R(12,Math.min(39,99-a)),tt=a+b,[u,it]=P(ITEMS);
+    if(k===0)return mq(`${n1}有 ${a} 元，${n2}給${n1}一些錢後，${n1}現在有 ${tt} 元。${n2}給了多少元？`,b,[a,tt]);
+    if(k===1)return mq(`${n1}有 ${tt} ${u}${it}，送給${n2}一些後，剩下 ${a} ${u}。送給${n2}幾${u}？`,b,[tt,a]);
+    if(k===2)return mq(`${n1}有一些${it}，用掉 ${b} ${u}後，還剩下 ${a} ${u}。${n1}原來有幾${u}？`,a+b,[a,b]);
+    if(k===3)return mq(`${n1}買了一個 ${a} 元的${P(['麵包','飯糰','蛋糕','餅乾','布丁'])}和一瓶飲料，共付 ${tt} 元。這瓶飲料多少元？`,b,[a,tt]);
+    return mq(`${n1}有 ${tt} 元，想買一個玩具，還差 ${b} 元。這個玩具賣多少元？`,tt+b,[tt,b]);
+  },
+  chk(){
+    const[n1]=pickNm(),k=R(0,3);
+    if(k===0){let a,b;do{a=R(41,95);b=R(11,a-1)}while(b%10<=a%10);return mq(`${a} - ${b} = ?`,a-b,[a,b])}
+    if(k===1){const a=R(40,99),b=R(11,a-10),c=a-b;return mq(`${n1}算 ${a} - ${b} = ${c}，用加法驗算：${c} + ${b} = ?`,a,[a,b])}
+    if(k===2){const x=R(20,60),y=R(15,39),z=x+y;return mq(`${n1}算 ${x} + ${y} = ${z}，用減法驗算：${z} - ${y} = ?`,x,[x,y])}
+    const a=R(41,95),b=R(11,a-10),ok=Math.random()<.5,sv=ok?a-b:a-b+P([10,-10]);
+    return[`${n1}算 ${a} - ${b} = ${sv}，驗算：${sv} + ${b} = ${sv+b}，這題算對了嗎？`,ok?'算對了':'算錯了','','算對了,算錯了'];
+  },
+  area(){
+    let x=R(8,30),y=R(8,30);while(x===y)y=R(8,30);
+    return[`用同樣大的小方格量，甲有 ${x} 格，乙有 ${y} 格，哪一個的面積比較大？`,x>y?'甲':'乙','','甲,乙']},
   word(){
-    const[u,t]=P(ITEMS),k=R(0,2),ex=new Set([...sel]);if(rot&&S.length)ex.add(turn);
+    const[u,t]=P(ITEMS),k=R(0,1),ex=new Set([...sel]);if(rot&&S.length)ex.add(turn);
     let pool=SH(S.filter((_,i)=>!ex.has(i)).map(s=>s.name));
     if(!pool.length)pool=['小明'];
     const M='\uE000',E='\uE001',nm=M+pool[0]+E,nm2=pool.length>1?M+pool[1]+E:'朋友';
     if(k===0){const a=R(12,50),b=R(8,40);return[`${nm}有 ${a} ${u}${t}，又拿到 ${b} ${u}，現在共有幾${u}？`,String(a+b)]}
-    if(k===1){const a=R(30,80),b=R(8,a-8);return[`${nm}有 ${a} ${u}${t}，送給${nm2} ${b} ${u}，還剩幾${u}？`,String(a-b)]}
-    const a=R(2,5),b=R(2,5);return[`每盒有 ${a} ${u}${t}，${b} 盒共有幾${u}？`,String(a*b)]}
+    const a=R(30,80),b=R(8,a-8);return[`${nm}有 ${a} ${u}${t}，送給${nm2} ${b} ${u}，還剩幾${u}？`,String(a-b)]}
 };
 let pool=[];
 const SH=a=>a.map(x=>[Math.random(),x]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
-let mc=true,O=null,zhu=true,rot=true,turn=0,turnN=0,hist=[];
+let mc=true,O=null,zhu=true,rot=true,turn=0,turnN=0,hist=[],qCount=0;
 const ZD={},ZW={};
 ('哪ㄋㄚˇ 個ㄍㄜ˙ 比ㄅㄧˇ 較ㄐㄧㄠˋ 大ㄉㄚˋ 小ㄒㄧㄠˇ 和ㄏㄢˋ 在ㄗㄞˋ 填ㄊㄧㄢˊ 入ㄖㄨˋ 或ㄏㄨㄛˋ 有ㄧㄡˇ 顆ㄎㄜ 糖ㄊㄤˊ 媽ㄇㄚ 又ㄧㄡˋ 給ㄍㄟˇ 他ㄊㄚ 現ㄒㄧㄢˋ 共ㄍㄨㄥˋ 幾ㄐㄧˇ 書ㄕㄨ 包ㄅㄠ 裡ㄌㄧˇ 枝ㄓ 筆ㄅㄧˇ 送ㄙㄨㄥˋ 同ㄊㄨㄥˊ 學ㄒㄩㄝˊ 還ㄏㄞˊ 剩ㄕㄥˋ 樹ㄕㄨˋ 上ㄕㄤˋ 隻ㄓ 鳥ㄋㄧㄠˇ 飛ㄈㄟ 走ㄗㄡˇ 哥ㄍㄜ 弟ㄉㄧˋ 元ㄩㄢˊ 兩ㄌㄧㄤˇ 人ㄖㄣˊ 多ㄉㄨㄛ 少ㄕㄠˇ 每ㄇㄟˇ 盤ㄆㄢˊ 蘋ㄆㄧㄥˊ 果ㄍㄨㄛˇ 分ㄈㄣ 塊ㄎㄨㄞˋ 餅ㄅㄧㄥˇ 乾ㄍㄢ 需ㄒㄩ 要ㄧㄠˋ 盒ㄏㄜˊ 鉛ㄑㄧㄢ 貼ㄊㄧㄝ 紙ㄓˇ 氣ㄑㄧˋ 球ㄑㄧㄡˊ 故ㄍㄨˋ 事ㄕˋ 拿ㄋㄚˊ 到ㄉㄠˋ 朋ㄆㄥˊ 友ㄧㄡˇ 花ㄏㄨㄚ 朵ㄉㄨㄛˇ 張ㄓㄤ 本ㄅㄣˇ 相ㄒㄧㄤ 加ㄐㄧㄚ 明ㄇㄧㄥˊ '+
- '一ㄧ 二ㄦˋ 三ㄙㄢ 四ㄙˋ 五ㄨˇ 六ㄌㄧㄡˋ 七ㄑㄧ 八ㄅㄚ 九ㄐㄧㄡˇ 十ㄕˊ 百ㄅㄞˇ 千ㄑㄧㄢ 的ㄉㄜ˙ 是ㄕˋ 了ㄌㄜ˙ 不ㄅㄨˋ 我ㄨㄛˇ 你ㄋㄧˇ 她ㄊㄚ 們ㄇㄣ˙ 什ㄕㄣˊ 麼ㄇㄜ˙ 吃ㄔ 買ㄇㄞˇ 賣ㄇㄞˋ 錢ㄑㄧㄢˊ 角ㄐㄧㄠˇ 班ㄅㄢ 全ㄑㄩㄢˊ 部ㄅㄨˋ 老ㄌㄠˇ 師ㄕ 子ㄗ˙ 家ㄐㄧㄚ 先ㄒㄧㄢ 後ㄏㄡˋ 請ㄑㄧㄥˇ 問ㄨㄣˋ 答ㄉㄚˊ 對ㄉㄨㄟˋ 錯ㄘㄨㄛˋ 最ㄗㄨㄟˋ 都ㄉㄡ 差ㄔㄚ 把ㄅㄚˇ 公ㄍㄨㄥ 斤ㄐㄧㄣ 天ㄊㄧㄢ 日ㄖˋ 看ㄎㄢˋ 圖ㄊㄨˊ 回ㄏㄨㄟˊ 沫ㄇㄛˋ 潾ㄌㄧㄣˊ').split(' ').forEach(e=>{ZD[e[0]]=e.slice(1)});
-'媽媽:ㄇㄚ/ㄇㄚ˙ 哥哥:ㄍㄜ/ㄍㄜ˙ 弟弟:ㄉㄧˋ/ㄉㄧ˙'.split(' ').forEach(e=>{const[w,z]=e.split(':');ZW[w]=z.split('/')});
+ '一ㄧ 二ㄦˋ 三ㄙㄢ 四ㄙˋ 五ㄨˇ 六ㄌㄧㄡˋ 七ㄑㄧ 八ㄅㄚ 九ㄐㄧㄡˇ 十ㄕˊ 百ㄅㄞˇ 千ㄑㄧㄢ 的ㄉㄜ˙ 是ㄕˋ 了ㄌㄜ˙ 不ㄅㄨˋ 我ㄨㄛˇ 你ㄋㄧˇ 她ㄊㄚ 們ㄇㄣ˙ 什ㄕㄣˊ 麼ㄇㄜ˙ 吃ㄔ 買ㄇㄞˇ 賣ㄇㄞˋ 錢ㄑㄧㄢˊ 角ㄐㄧㄠˇ 班ㄅㄢ 全ㄑㄩㄢˊ 部ㄅㄨˋ 老ㄌㄠˇ 師ㄕ 子ㄗ˙ 家ㄐㄧㄚ 先ㄒㄧㄢ 後ㄏㄡˋ 請ㄑㄧㄥˇ 問ㄨㄣˋ 答ㄉㄚˊ 對ㄉㄨㄟˋ 錯ㄘㄨㄛˋ 最ㄗㄨㄟˋ 都ㄉㄡ 差ㄔㄚ 把ㄅㄚˇ 公ㄍㄨㄥ 斤ㄐㄧㄣ 天ㄊㄧㄢ 日ㄖˋ 看ㄎㄢˋ 圖ㄊㄨˊ 回ㄏㄨㄟˊ 沫ㄇㄛˋ 潾ㄌㄧㄣˊ 接ㄐㄧㄝ 著ㄓㄜ˙ 數ㄕㄨˇ 面ㄇㄧㄢˋ 倒ㄉㄠˋ 再ㄗㄞˋ 前ㄑㄧㄢˊ 合ㄏㄜˊ 起ㄑㄧˇ 來ㄌㄞˊ 位ㄨㄟˋ 字ㄗˋ 美ㄇㄟˇ 支ㄓ 彈ㄉㄢˋ 珠ㄓㄨ 贏ㄧㄥˊ 車ㄔㄜ 下ㄒㄧㄚˋ 用ㄩㄥˋ 樣ㄧㄤˋ 積ㄐㄧ 木ㄇㄨˋ 量ㄌㄧㄤˊ 桌ㄓㄨㄛ 長ㄔㄤˊ 尺ㄔˇ 度ㄉㄨˋ 時ㄕˊ 候ㄏㄡˋ 從ㄘㄨㄥˊ 刻ㄎㄜˋ 開ㄎㄞ 始ㄕˇ 棒ㄅㄤˋ 東ㄉㄨㄥ 西ㄒㄧ 頭ㄊㄡˊ 尾ㄨㄟˇ 可ㄎㄜˇ 以ㄧˇ 留ㄌㄧㄡˊ 空ㄎㄨㄥ 隙ㄒㄧˋ 格ㄍㄜˊ 迴ㄏㄨㄟˊ 紋ㄨㄣˊ 針ㄓㄣ 約ㄩㄝ 條ㄊㄧㄠˊ 緞ㄉㄨㄢˋ 帶ㄉㄞˋ 線ㄒㄧㄢˋ 紅ㄏㄨㄥˊ 繩ㄕㄥˊ 藍ㄌㄢˊ 剪ㄐㄧㄢˇ 掉ㄉㄧㄠˋ 橡ㄒㄧㄤˋ 皮ㄆㄧˊ 擦ㄘㄚ 所ㄙㄨㄛˇ 括ㄍㄨㄚ 號ㄏㄠˋ 法ㄈㄚˇ 驗ㄧㄢˋ 算ㄙㄨㄢˋ 減ㄐㄧㄢˇ 其ㄑㄧˊ 中ㄓㄨㄥ 女ㄋㄩˇ 生ㄕㄥ 男ㄋㄢˊ 館ㄍㄨㄢˇ 借ㄐㄧㄝˋ 出ㄔㄨ 華ㄏㄨㄚˊ 玩ㄨㄢˊ 具ㄐㄩˋ 凱ㄎㄞˇ 安ㄢ 玲ㄌㄧㄥˊ 阿ㄚ 傑ㄐㄧㄝˊ 這ㄓㄜˋ 題ㄊㄧˊ 嗎ㄇㄚ˙ 宏ㄏㄨㄥˊ 些ㄒㄧㄝ 爸ㄅㄚˋ 超ㄔㄠ 商ㄕㄤ 飯ㄈㄢˋ 糰ㄊㄨㄢˊ 瓶ㄆㄧㄥˊ 飲ㄧㄣˇ 料ㄌㄧㄠˋ 付ㄈㄨˋ 店ㄉㄧㄢˋ 員ㄩㄢˊ 姐ㄐㄧㄝˇ 色ㄙㄜˋ 妹ㄇㄟˋ 烘ㄏㄨㄥ 焙ㄅㄟˋ 坊ㄈㄤ 午ㄨˇ 製ㄓˋ 作ㄗㄨㄛˋ 蛋ㄉㄢˋ 黃ㄏㄨㄤˊ 酥ㄙㄨ 嘉ㄐㄧㄚ 想ㄒㄧㄤˇ 輛ㄌㄧㄤˋ 夠ㄍㄡˋ 雯ㄨㄣˊ 原ㄩㄢˊ 麵ㄇㄧㄢˋ 布ㄅㄨˋ 丁ㄉㄧㄥ 片ㄆㄧㄢˋ 巧ㄑㄧㄠˇ 克ㄎㄜˋ 力ㄌㄧˋ 牛ㄋㄧㄡˊ 奶ㄋㄞˇ 香ㄒㄧㄤ 汁ㄓ 奇ㄑㄧˊ 丹ㄉㄢ 亞ㄧㄚˋ 摺ㄓㄜˊ 鶴ㄏㄜˋ 蒐ㄙㄡ 集ㄐㄧˊ 笑ㄒㄧㄠˋ 臉ㄌㄧㄢˇ 鮮ㄒㄧㄢ 昨ㄗㄨㄛˊ 存ㄘㄨㄣˊ 今ㄐㄧㄣ 水ㄕㄨㄟˇ 梨ㄌㄧˊ 甜ㄊㄧㄢˊ 柿ㄕˋ 各ㄍㄜˋ 態ㄊㄞˋ 園ㄩㄢˊ 培ㄆㄟˊ 育ㄩˋ 蝴ㄏㄨˊ 蝶ㄉㄧㄝˊ 蜻ㄑㄧㄥ 蜓ㄊㄧㄥˊ 恐ㄎㄨㄥˇ 龍ㄌㄨㄥˊ 卡ㄎㄚˇ 冰ㄅㄧㄥ 箱ㄒㄧㄤ 喝ㄏㄜ 糕ㄍㄠ 杯ㄅㄟ 茶ㄔㄚˊ 貴ㄍㄨㄟˋ 疊ㄉㄧㄝˊ 露ㄌㄨˋ 那ㄋㄚˋ 甲ㄐㄧㄚˇ 方ㄈㄤ 形ㄒㄧㄥˊ 整ㄓㄥˇ 蓋ㄍㄞˋ 乙ㄧˇ 能ㄋㄥˊ 搬ㄅㄢ 怎ㄗㄣˇ 丙ㄅㄧㄥˇ 鋪ㄆㄨ 種ㄓㄨㄥˇ 顏ㄧㄢˊ 鐵ㄊㄧㄝˇ 絲ㄙ 宇ㄩˇ 市ㄕˋ 場ㄔㄤˇ 青ㄑㄧㄥ 菜ㄘㄞˋ 袋ㄉㄞˋ 闆ㄅㄢˇ 表ㄅㄧㄠˇ 早ㄗㄠˇ 做ㄗㄨㄛˋ 琪ㄑㄧˊ 罐ㄍㄨㄢˋ 草ㄘㄠˇ 莓ㄇㄟˊ 倩ㄑㄧㄢˋ 郵ㄧㄡˊ 票ㄆㄧㄠˋ 志ㄓˋ 記ㄐㄧˋ 毛ㄇㄠˊ 睿ㄖㄨㄟˋ 姑ㄍㄨ 橘ㄐㄩˊ 鄰ㄌㄧㄣˊ 居ㄐㄩ 勞ㄌㄠˊ 爺ㄧㄝˊ 收ㄕㄡ 玉ㄩˋ 米ㄇㄧˇ 地ㄉㄧˋ 瓜ㄍㄨㄚ 麻ㄇㄚˊ 雀ㄑㄩㄝˋ 鴿ㄍㄜ 德ㄉㄜˊ 櫃ㄍㄨㄟˋ 漢ㄏㄢˋ 堡ㄅㄠˇ').split(' ').forEach(e=>{ZD[e[0]]=e.slice(1)});
+'媽媽:ㄇㄚ/ㄇㄚ˙ 哥哥:ㄍㄜ/ㄍㄜ˙ 弟弟:ㄉㄧˋ/ㄉㄧ˙ 姐姐:ㄐㄧㄝˇ/ㄐㄧㄝ˙ 妹妹:ㄇㄟˋ/ㄇㄟ˙ 爸爸:ㄅㄚˋ/ㄅㄚ˙ 時候:ㄕˊ/ㄏㄡ˙ 東西:ㄉㄨㄥ/ㄒㄧ˙ 數字:ㄕㄨˋ/ㄗˋ 哪個數:ㄋㄚˇ/ㄍㄜ˙/ㄕㄨˋ 還回:ㄏㄨㄢˊ/ㄏㄨㄟˊ 奶奶:ㄋㄞˇ/ㄋㄞ˙ 爺爺:ㄧㄝˊ/ㄧㄝ˙ 姑姑:ㄍㄨ/ㄍㄨ˙'.split(' ').forEach(e=>{const[w,z]=e.split(':');ZW[w]=z.split('/')});
 function zyH(z){
   const t='ˊˇˋ˙'.includes(z.slice(-1))?z.slice(-1):'',b=t?z.slice(0,-1):z;
   return t==='˙'?`<span class="zy n"><i>˙</i><b>${b}</b></span>`:`<span class="zy"><b>${b}</b>${t?`<i>${t}</i>`:''}</span>`;
@@ -332,28 +541,29 @@ function mkOpts(q){
   const a=String(q[1]).trim();
   if(/^[<>=]$/.test(a))return SH(['>','<','=']);
   if(!/^\d+$/.test(a))return null;
-  if(/哪個比較/.test(q[0])){const m=[...new Set(q[0].match(/\d+/g)||[])];if(m.length>=2&&m.includes(a))return SH(m.slice(0,4))}
-  const v=+a,must=/哪個比較/.test(q[0])?(q[0].match(/\d+/g)||[]).map(Number).filter(x=>x!==v):[];
+  if(/哪個(比較|數最)/.test(q[0])){const m=[...new Set(q[0].match(/\d+/g)||[])];if(m.length>=2&&m.includes(a))return SH(m.slice(0,4))}
+  const v=+a,must=/哪個(比較|數最)/.test(q[0])?(q[0].match(/\d+/g)||[]).map(Number).filter(x=>x!==v):[];
   const rest=SH([v+1,v-1,v+2,v-2,v+10,v-10,+a.split('').reverse().join('')]);
   const d=[...new Set(must.concat(rest))].filter(x=>x>=0&&x!==v).slice(0,3);
   return SH([a,...d.map(String)]);
 }
 function buildO(){O=null;if(mc&&cur){const l=mkOpts(cur);if(l)O={list:l,ans:String(cur[1]).trim(),picked:null}}}
 function setQ(q,meta){
-  cur=q;showA=false;$('hardChk').checked=false;$('qmeta').textContent=meta;sfx('click');if(rot&&S.length)sel=new Set([turn]);buildO();render();tmQ++;judged=false;startTimer();
+  const L=isLong(q[0]);pushRecent(q);
+  cur=q;showA=false;$('hardChk').checked=L;$('qmeta').textContent=meta+(L?'　🌟 超過 20 字，算難題（答對走 2 格）':'');sfx('click');if(rot&&S.length)sel=new Set([turn]);buildO();render();tmQ++;judged=false;startTimer();
   say(qSpeech());
 }
-function qSpeech(){return (rot&&S.length?`輪到${S[turn].name}。`:'')+rd(cur[0])+(O?'。'+O.list.map((o,i)=>`選項${'ABCD'[i]}，${rd(o)}`).join('。'):'')}
+function qSpeech(){return (rot&&S.length?`輪到${S[turn].name}。`:'')+rd(cur[0])}
 function pick(i){
   if(!O||O.picked!==null||over)return;
   if(!sel.size){sfx('bad');return toast('請先勾選上台答題的小朋友 ☝️')}
   O.picked=i;stopTimer();const ok=O.list[i]===O.ans;sfx('click');render();
   setTimeout(()=>answer(ok?($('hardChk').checked?'hard':'ok'):'bad'),600);
 }
-function snap(){hist.push(JSON.stringify({S,tiger,wrong,turn,turnN,over}));if(hist.length>40)hist.shift()}
+function snap(){hist.push(JSON.stringify({S,tiger,wrong,turn,turnN,over,qCount}));if(hist.length>40)hist.shift()}
 function undo(){
   if(!hist.length)return toast('目前沒有可以復原的步驟',false);
-  const h=JSON.parse(hist.pop());S=h.S;tiger=h.tiger;wrong=h.wrong;turn=h.turn;turnN=h.turnN;over=h.over;
+  const h=JSON.parse(hist.pop());S=h.S;tiger=h.tiger;wrong=h.wrong;turn=h.turn;turnN=h.turnN;over=h.over;qCount=h.qCount||0;
   sel=new Set(rot&&S.length?[turn]:[]);if(O)O.picked=null;
   document.querySelectorAll('#conf,#fwc').forEach(e=>e.remove());
   closeM();render();sfx('click');toast('↩️ 已復原上一步',false);
@@ -364,7 +574,7 @@ function tigerManual(d){
   if(d>0){
     const msgs=[];tigerAdvance(msgs);render();
     if(tiger>=END){over=true;render();setTimeout(lose,1800);return}
-    toast(msgs.join('\n'),msgs.join('。'));$('toast').style.whiteSpace='pre-line';
+    toast(msgs[0],msgs.join('。'),msgs.slice(1));
   }else{tiger=Math.max(0,tiger-1);sfx('click');render();toast('🐯 老虎退後 1 步，大家加油～')}
 }
 let tmId=null,tmLeft=60,tmQ=0,judged=false;
@@ -388,6 +598,11 @@ function startTimer(){
   },1000);
 }
 function tmChange(){if($('tmChk').checked)startTimer();else{stopTimer();tmShow()}sfx('click')}
+function toggleTools(){$('tools').classList.toggle('hidden');sfx('click')}
+function hideTools(){$('tools').classList.add('hidden')}
+function toolDo(f){hideTools();f()}
+function okClick(){answer($('hardChk').checked?'hard':'ok')}
+document.addEventListener('click',e=>{const t=$('tools');if(t&&!t.classList.contains('hidden')&&!t.contains(e.target)&&e.target.id!=='bTools')hideTools()});
 function tglRot(){rot=!rot;$('bRot').textContent=rot?'🔁 輪流：開':'🔁 輪流：關';sel=new Set(rot&&S.length?[turn]:[]);sfx('click');render()}
 function skipTurn(){
   if(!rot||!S.length)return toast('請先開啟輪流模式',false);
@@ -396,17 +611,62 @@ function skipTurn(){
   toast(`換 ${S[turn].av}${S[turn].name} 囉！`);
 }
 function tglMc(){mc=!mc;$('bMc').textContent=mc?'🔘 選擇題：開':'⚪ 選擇題：關';sfx('click');buildO();render()}
-function showQ(i){setQ(bank[i],`（題庫第 ${i+1} / ${bank.length} 題）`)}
+function showQ(i){setQ(bank[i],`（${bank[i][4]||'題庫'}・第 ${i+1} / ${bank.length} 題）`)}
+let recentQ=[];
+try{recentQ=JSON.parse(localStorage.getItem('mtc_recent')||'[]')||[]}catch(e){}
+const qkey=t=>String(t).replace(/\uE000.*?\uE001/g,'#').replace(/\s+/g,'');
+function pushRecent(q){
+  recentQ.push(qkey(q[0]));if(recentQ.length>80)recentQ.shift();
+  try{localStorage.setItem('mtc_recent',JSON.stringify(recentQ))}catch(e){}
+}
+const isLong=t=>String(t).replace(/[\s\uE000\uE001]/g,'').length>20;
 function randQ(){
   const m=$('qmode').value;
-  if(m==='bank'){
+  if(m.startsWith('bank')){
     if(!bank.length)return toast('題庫是空的，請先新增題目，或改用「♾️ 自動出題」📚');
-    if(!pool.length){pool=bank.map((_,i)=>i);if(cur)toast('📚 題庫已出完一輪，重新洗牌！',false)}
-    const i=pool.splice(R(0,pool.length-1),1)[0];
-    setQ(bank[i],`（題庫第 ${i+1} 題，本輪還剩 ${pool.length} 題）`);
-  }else setQ(GEN[m==='mix'?P(Object.keys(GEN)):m](),'（♾️ 自動出題）');
+    const u=m.slice(5);
+    if(!pool.length){
+      const all=bank.map((_,i)=>i).filter(i=>!u||String(bank[i][4]||'').startsWith(u));
+      if(!all.length)return toast('這個單元還沒有題目，請到題庫管理新增，或改選「全部單元」',false);
+      const fresh=all.filter(i=>!recentQ.includes(qkey(bank[i][0])));
+      pool=fresh.length?fresh:all;
+      if(!fresh.length&&cur)toast('📚 這個範圍的題目都出過了，重新洗牌！',false);
+    }
+    let k=R(0,pool.length-1);
+    if(pool.length>1&&qkey(bank[pool[k]][0])===recentQ[recentQ.length-1])k=(k+1)%pool.length;
+    const i=pool.splice(k,1)[0];
+    setQ(bank[i],`（${bank[i][4]||'題庫'}・本輪還剩 ${pool.length} 題）`);
+  }else{
+    const g=()=>GEN[m==='mix'?P(MIX):m]();
+    let q=g();for(let t=0;t<25&&recentQ.includes(qkey(q[0]));t++)q=g();
+    setQ(q,'（♾️ 自動出題）');
+  }
 }
 function readQ(){if(!cur)return toast('請先出題 🎲');if(!speak){speak=true;tgl('x');tgl('x');}say(qSpeech())}
+function openRules(){
+  sfx('click');
+  const wr=CFG.wrong==='old'?'每答錯 2 題，老虎前進 1 格':`只要有人答錯一題，老虎就衝 ${CFG.wrong} 格！`;
+  const pt={round:'全班每答完一輪',mid:'全班每答完 3/4 輪',half:'全班每答完半輪'}[CFG.patrol];
+  const row=(e,t,d)=>`<div class="flex gap-3 items-start rounded-2xl bg-yellow-50 border-2 border-yellow-200 p-3"><div class="text-4xl md:text-5xl">${e}</div><div><div class="text-xl md:text-2xl font-black text-orange-700">${t}</div><div class="text-lg md:text-xl font-bold text-gray-700">${d}</div></div></div>`;
+  openM(`<div class="text-3xl font-black mb-3 text-center">📖 遊戲規則</div><div class="grid gap-2 text-left">`
+   +row('🏁','怎樣才會贏','比老虎先跑到終點！老虎先到，就是老虎贏。')
+   +row('✅','答對往前走',(CFG.dice?'擲骰子，擲到幾點走幾格（難題多一點）。':'答對走 1 格。')+'難題，或題目超過 20 個字，答對走 2 格。')
+   +row('📍','位置','現在站在第幾格。')
+   +row('⭐','星星','每答對一題得 1 顆星。'+(bonus>0?`累積滿 5 顆，加速多走 ${bonus} 格！`:''))
+   +row('🔥','連對','連續答對的題數。連續答對 3 題，得到 1 個護盾。')
+   +row('🛡️','護盾','老虎追到你的時候，護盾會幫你擋住一次。沒有護盾，會被嚇到退後 1 格。')
+   +row('🐯','老虎',wr+(pt?`　老虎還會自己巡邏：${pt}，往前走 1 格。`:'')+(CFG.retreat?'　被追上時老虎會退後 1 格。':'　被你超過時，老虎不會退後。'))
+   +(CFG.cards?row('🎴','命運格・機會格','踩到紫色框的格子會抽卡：有好事（衝刺、護盾、星星⋯）也可能暫停一次、後退。'):'')
+   +row('⏸️','暫停一次','輪到你的時候要休息一次，換下一位同學。')
+   +row('🔁','輪流答題','答對可以再答 1 題（最多連續 2 題）；答錯就換下一位。')
+   +`</div><div class="text-center mt-4"><button onclick="closeM()" class="btn bg-sky-500 !py-2 !text-lg">知道了</button></div>`);
+  $('mbox').classList.add('!max-w-4xl');
+}
+function helpQ(){
+  sfx('click');
+  openM(`<div class="text-2xl font-black mb-3">❓ 出題方式說明</div><div class="space-y-3 text-lg font-bold text-left"><div>📚 <b>題庫</b>：老師整理好的固定題目（也可以自己新增、修改）。每一輪題目不會重複，全部出完才重新洗牌。可以只選某一個單元來出題，例如這週教第二單元，就選「題庫・第二單元」。</div><div>♾️ <b>自動出題</b>：電腦依照題型隨機產生新題目，永遠出不完，也不用事先準備。題目裡的人名會用班上的小朋友，並避開正在答題的人。</div><div class="text-gray-600">小提醒：兩種方式可以隨時切換，不會影響遊戲進度。</div></div><div class="text-center mt-4"><button onclick="closeM()" class="btn bg-sky-500 !py-2 !text-lg">知道了</button></div>`);
+}
+function readOpts(){if(!O)return toast('這題沒有選項',false);say(O.list.map((o,i)=>`選項${'ABCD'[i]}，${rd(o)}`).join('。'))}
 function tglAns(){if(!cur)return;showA=!showA;sfx('click');render()}
 
 /* ---------- 遊戲核心 ---------- */
@@ -414,59 +674,115 @@ const WARN=['小心！老虎追上來了！','快跑快跑！老虎就在後面�
 const HIT=['啊啊啊！老虎抓到你了！','救命啊！老虎撲過來了！','哇！好可怕！快逃啊！','糟糕！被老虎追到了！','嚇死寶寶了！老虎衝過來！'];
 const SAFE=['好險！護盾擋住了老虎！','哇，好險好險！護盾救了你！','叮！護盾把老虎彈開了！'];
 function alarmFx(){const a=$('app'),f=$('flash');a.classList.remove('shake');f.classList.remove('on');void a.offsetWidth;a.classList.add('shake');f.classList.add('on')}
-function tigerAdvance(msgs){
-  tiger=Math.min(END,tiger+1);
-  let hit=false,safe=false;
-  S.forEach(s=>{
-    if(s.pos===tiger&&s.pos<END){
-      if(s.shields>0){s.shields--;safe=true;msgs.push(`${s.av}${s.name} ${nxt('safe',SAFE)} 🛡️`)}
-      else{s.pos=Math.max(1,s.pos-1);hit=true;msgs.push(`‼${nxt('hit',HIT)} ${s.av}${s.name} 退後 1 步 😱`)}
-    }
-  });
-  if(!hit&&!safe)msgs.push(`‼🐯 ${nxt('warn',WARN)}`);
+function tigerAdvance(msgs,n=1){
+  let hit=false,safe=false,mv=0;const hm=[];
+  for(let i=0;i<n&&tiger<END;i++){
+    tiger++;mv++;
+    S.forEach(s=>{
+      if(s.pos===tiger&&s.pos<END){
+        if(s.shields>0){s.shields--;safe=true;hm.push(`${s.av}${s.name} ${nxt('safe',SAFE)} 🛡️`)}
+        else{s.pos=Math.max(1,s.pos-1);hit=true;hm.push(`‼${nxt('hit',HIT)} ${s.av}${s.name} 退後 1 步 😱`)}
+      }
+    });
+  }
+  if(mv>1)msgs.push(`‼🐯 老虎衝刺 ${mv} 格！`);
+  else if(!hit&&!safe)msgs.push(`‼🐯 ${nxt('warn',WARN)}`);
+  hm.forEach(x=>msgs.push(x));
   sfx('danger');setTimeout(()=>sfx('growl'),300);
   if(hit){setTimeout(()=>sfx('roar'),500);setTimeout(()=>sfx('scream'),800);alarmFx()}
   else if(safe)setTimeout(()=>sfx('shield'),700);
   else setTimeout(()=>sfx('thump'),700);
 }
+const specAt=k=>k>1&&k<END?(k%5===3?'fate':k%5===0?'luck':''):'';
+const mvTo=(s,d)=>{s.pos=Math.max(1,Math.min(END,s.pos+d))};
+const DECK={
+  luck:[
+    {e:'🚀',t:'火箭衝刺',d:'前進 3 步',g:1,fx:s=>mvTo(s,3)},
+    {e:'🛡️',t:'幸運護盾',d:'獲得 1 個護盾',g:1,fx:s=>{s.shields++}},
+    {e:'⭐',t:'星星雨',d:'獲得 2 顆星',g:1,fx:s=>{s.stars+=2}},
+    {e:'🎲',t:'再來一次',d:'可以再答一題',g:1,fx:s=>{s.extra=1}},
+    {e:'😴',t:'老虎打瞌睡',d:'老虎退後 2 步',g:1,fx:()=>{tiger=Math.max(0,tiger-2)}},
+    {e:'🤝',t:'好朋友幫忙',d:'最落後的同學前進 2 步',g:1,fx:()=>{const l=S.filter(x=>x.pos<END).sort((a,b)=>a.pos-b.pos)[0];if(l)mvTo(l,2)}}
+  ],
+  fate:[
+    {e:'🍀',t:'好運降臨',d:'前進 2 步',g:1,fx:s=>mvTo(s,2)},
+    {e:'🎁',t:'神祕禮物',d:'獲得 1 顆星和 1 個護盾',g:1,fx:s=>{s.stars++;s.shields++}},
+    {e:'⏸️',t:'暫停一次',d:'下一次輪到你，要休息一次',g:0,fx:s=>{s.skip=1}},
+    {e:'🌀',t:'迷路了',d:'後退 2 步',g:0,fx:s=>mvTo(s,-2)},
+    {e:'🐯',t:'老虎偷襲',d:'老虎往前追 1 步',g:0,fx:(s,m)=>tigerAdvance(m)},
+    {e:'🍭',t:'糖果誘惑',d:'停下來吃糖，後退 1 步',g:0,fx:s=>mvTo(s,-1)}
+  ]};
+let cardQ=[];
+function showCards(l){
+  if(over)return;
+  if(l)cardQ=l;
+  const x=cardQ.shift();if(!x)return;
+  const lab=x.type==='fate'?'命運卡':'機會卡';
+  sfx(x.c.g?'card':'cardBad');
+  openM(`<div class="text-center"><div class="text-2xl md:text-3xl font-black text-purple-600">${x.type==='fate'?'🎴':'🎁'} ${lab}</div><div class="text-8xl my-3 pop">${x.c.e}</div><div class="text-3xl md:text-5xl font-black ${x.c.g?'text-green-600':'text-rose-600'}">${esc(x.c.t)}</div><div class="text-2xl md:text-3xl font-bold my-3">${x.s.av} ${esc(x.s.name)}：${esc(x.c.d)}</div><button onclick="closeM();setTimeout(showCards,250)" class="btn bg-green-500 mt-2">好的！</button></div>`);
+  say(`${lab}！${x.s.name}，${x.c.t}。${x.c.d}`);
+}
+function nextTurn(msgs){
+  for(let i=0;i<S.length;i++){
+    turn=(turn+1)%S.length;turnN=0;
+    if(S[turn].skip>0){S[turn].skip--;msgs.push(`⏸️ ${S[turn].av}${S[turn].name} 暫停一次，跳過`);continue}
+    break;
+  }
+  msgs.push(`換 ${S[turn].av}${S[turn].name} 囉！`);
+}
 function answer(kind){
   if(over)return toast('遊戲已結束，請按「🔄 重新開始」或「↩️ 返回上一步」');
-  const P=S.filter((_,i)=>sel.has(i));
+  let P=S.filter((_,i)=>sel.has(i));
   if(!P.length){sfx('bad');return toast('請先勾選答題的小朋友 ☝️')}
   snap();judged=true;stopTimer();
-  const msgs=[],wasTurn=P.length===1&&S.indexOf(P[0])===turn;
+  const msgs=[],cards=[],fr=P.filter(s=>s.skip>0);
+  fr.forEach(s=>{s.skip--;msgs.push(`⏸️ ${s.av}${s.name} 暫停中，這次休息一次`)});
+  P=P.filter(s=>!fr.includes(s));
+  if(!P.length){sel.clear();if(rot)sel.add(turn);render();return toast(msgs.join('\n'))}
+  const wasTurn=P.length===1&&S.indexOf(P[0])===turn,names=P.map(s=>s.name).join('、');
+  qCount++;
   if(kind==='bad'){
-    sfx('bad');
-    P.forEach(s=>s.streak=0);
-    wrong++;
-    msgs.push(`${cheer('bad',P)} 💪（${P.map(s=>s.name).join('、')}）`);
-    if(wrong%2===0)setTimeout(()=>{},0),tigerAdvance(msgs);
+    sfx('bad');P.forEach(s=>s.streak=0);wrong++;
+    msgs.push(`${cheer('bad',P)} 💪（${names}）`);
+    if(CFG.wrong==='old'){if(wrong%2===0)tigerAdvance(msgs)}else tigerAdvance(msgs,+CFG.wrong);
   }else{
-    let hurt=false,sh=false;
+    let hurt=false,sh=false;const mv=[];
     P.forEach(s=>{
-      const old=s.pos;let step=kind==='hard'?2:1;
+      const old=s.pos;let step=kind==='hard'?2:1,dr='';
+      if(CFG.dice){step=kind==='hard'?R(2,4):R(1,3);dr=`🎲擲出 ${step} 點，`}
       s.stars++;s.streak++;
       if(s.streak%3===0){s.shields++;sh=true;msgs.push(`${s.av}${s.name} 連對 3 題，獲得護盾🛡️`)}
       if(bonus>0&&s.stars%5===0){step+=bonus;msgs.push(`${s.av}${s.name} 集滿 5 顆星，加速前進 ${bonus} 步！🌟`)}
       s.pos=Math.min(END,s.pos+step);
+      mv.push(`${s.name} ${dr}前進 ${step} 步`);
       if(tiger>0&&old<=tiger&&s.pos>=tiger)hurt=true;
+      if(s.pos<END&&CFG.cards){const t=specAt(s.pos);if(t){cards.push({s,type:t});msgs.push(`${s.av}${s.name} 踩到${t==='fate'?'🎴命運':'🎁機會'}格！`)}}
     });
-    msgs.unshift(kind==='hard'?`${cheer('hard',P)} ${P.map(s=>s.name).join('、')} 前進 2 步 🌟`:`${cheer('ok',P)} ${P.map(s=>s.name).join('、')} 前進 1 步 ✅`);
+    msgs.unshift(`${cheer(kind==='hard'?'hard':'ok',P)} ${mv.join('，')} ${kind==='hard'?'🌟':'✅'}`);
     sfx(kind==='hard'?'hard':'ok');
     if(sh)setTimeout(()=>sfx('shield'),700);
-    if(hurt){tiger=Math.max(0,tiger-1);msgs.push('‼🐯 嗷嗚！好痛！老虎被追上，退後 1 步～');setTimeout(()=>sfx('hurt'),900)}
+    if(hurt){
+      if(CFG.retreat){tiger=Math.max(0,tiger-1);msgs.push('‼🐯 嗷嗚！好痛！老虎被追上，退後 1 步～');setTimeout(()=>sfx('hurt'),900)}
+      else msgs.push('💨 超越老虎，把牠甩在後面！');
+    }
   }
+  const shown=[];
+  cards.forEach(({s,type})=>{if(s.pos>=END)return;const c=nxt(type,DECK[type]);c.fx(s,msgs);shown.push({s,c,type})});
+  if(CFG.patrol!=='off'){const per=Math.max(2,CFG.patrol==='half'?Math.ceil(S.length/2):CFG.patrol==='mid'?Math.ceil(S.length*0.75):S.length);if(qCount%per===0)tigerAdvance(msgs)}
   if(rot&&wasTurn){
-    turnN++;
-    if(kind!=='bad'&&turnN<2)msgs.push(`${S[turn].av}${S[turn].name} 答對了，再答一題，加油！`);
-    else{turn=(turn+1)%S.length;turnN=0;msgs.push(`換 ${S[turn].av}${S[turn].name} 囉！`)}
+    turnN++;const cu=S[turn];let stay=kind!=='bad'&&turnN<2,extra=false;
+    if(cu.extra){cu.extra=0;stay=true;extra=true;turnN=0}
+    if(stay&&cu.skip>0){stay=false;extra=false;cu.skip=0;msgs.push(`⏸️ ${cu.av}${cu.name} 暫停一次，沒有第二次機會`)}
+    if(stay)msgs.push(extra?`${cu.av}${cu.name} 抽到再來一次，再答一題！`:`${cu.av}${cu.name} 答對了，再答一題，加油！`);
+    else nextTurn(msgs);
   }
   sel.clear();if(rot)sel.add(turn);render();
   const w=S.filter(s=>s.pos>=END);
   if(w.length){over=true;render();setTimeout(()=>win(w),1400);return}
   if(tiger>=END){over=true;render();setTimeout(lose,1800);return}
-  toast(msgs.join('\n'),msgs.join('。'));
-  $('toast').style.whiteSpace='pre-line';
+  const evs=msgs.slice(1),spk=[msgs[0],...evs.filter(x=>/‼|換 |再答一題|集滿|連對|暫停|踩到/.test(x))].slice(0,4);
+  const dur=toast(msgs[0],spk.join('。'),evs);
+  if(shown.length)setTimeout(()=>showCards(shown),Math.min(dur-300,9000));
 }
 function buzzer(){
   if(!S.length)return;
@@ -511,13 +827,13 @@ function rankHtml(){
 }
 function endBtns(){return `<div class="flex flex-wrap justify-center gap-2"><button onclick="again()" class="btn bg-green-500">🔄 再玩一次</button><button onclick="undo()" class="btn bg-amber-500">↩️ 復原上一步</button><button onclick="closeM()" class="btn bg-sky-500">👀 看看棋盤</button><button onclick="closeM();openSetup()" class="btn bg-orange-500">🏠 回首頁設定</button></div>`}
 function win(w){
-  sfx('win');confetti(['🎉','⭐','🎊','✨','🏆']);setTimeout(()=>fireworks(7000),900);
+  musicStop();sfx('win');confetti(['🎉','⭐','🎊','✨','🏆']);setTimeout(()=>fireworks(7000),900);
   const names=w.map(s=>s.av+' '+esc(s.name)).join('、');
   openM(`<div class="text-center"><div class="text-7xl pop">🏆🎉</div><div class="text-3xl md:text-5xl font-black text-orange-600 my-3">${names}</div><div class="text-2xl md:text-4xl font-black">衝過終點，贏過老虎啦！</div><div class="text-xl font-bold text-gray-600 mt-1">🏁 比賽結束 🏁</div>${rankHtml()}${endBtns()}</div>`);
   say(w.map(s=>s.name).join('，')+' 衝過終點，贏過老虎了。比賽結束，恭喜你們！');
 }
 function lose(){
-  sfx('lose');alarmFx();confetti(['🍂','💧','☁️']);
+  musicStop();sfx('lose');alarmFx();confetti(['🍂','💧','☁️']);
   openM(`<div class="text-center"><div class="text-7xl pop">🐯💨</div><div class="text-3xl md:text-5xl font-black text-rose-600 my-3">老虎先衝到終點了！</div><div class="text-2xl md:text-4xl font-black">比賽結束，這次老虎贏了～</div><div class="text-xl md:text-2xl font-bold text-gray-700 mt-2">大家都很努力，我們再挑戰一次，一定可以打敗老虎！💪</div>${rankHtml()}${endBtns()}</div>`);
   say('‼老虎先衝到終點了！。比賽結束，這次老虎贏了。。大家都很努力，我們再挑戰一次，一定可以打敗老虎！');
 }
@@ -526,23 +842,37 @@ function ask(msg,yes){
   $('askY').onclick=()=>{closeM();yes()};
 }
 function resetGame(){ask('確定要重新開始嗎？<br>所有位置與星星都會歸零。',again)}
-function again(){closeM();initGame();toast('🔄 遊戲重新開始！加油！')}
+function again(){closeM();initGame();musicStart();toast('🔄 遊戲重新開始！加油！')}
 function initGame(){
   END=len;S=D.slice(0,n).map(d=>({name:d.name||'小朋友',av:d.av,g:d.g||'',say:(d.say||'').trim()||(d.name||'').replace(/沫/g,'墨'),pos:1,stars:0,shields:0,streak:0}));
-  tiger=0;wrong=0;over=false;turn=0;turnN=0;hist=[];stopTimer();tmShow();sel=new Set(rot?[0]:[]);render();
+  tiger=0;wrong=0;over=false;turn=0;turnN=0;hist=[];qCount=0;stopTimer();tmShow();sel=new Set(rot?[0]:[]);render();
 }
 
 /* ---------- 彈窗 ---------- */
 function openM(h){$('mbox').innerHTML=h;$('modal').classList.remove('hidden')}
 function closeM(){$('modal').classList.add('hidden');$('mbox').classList.remove('!max-w-[95vw]');sfx('click')}
 function openSetup(first){
+  if(!first&&S.length&&!setupBak)setupBak=JSON.stringify({D,n,len,bonus,CFG});
   fixAv();
   let h=`<div class="text-3xl font-black mb-3">${first?'🐯 歡迎來到數學老虎追追追！':'🏠 首頁設定（人數・賽道長度・姓名・頭像）'}</div><div class="font-bold text-lg mb-1">參加人數：</div><div class="flex flex-wrap gap-2 mb-3">`;
   for(let k=2;k<=8;k++)h+=`<button onclick="setN(${k})" class="w-14 h-14 rounded-2xl text-2xl font-black ${k===n?'bg-orange-500 text-white':'bg-gray-100'}">${k}</button>`;
-  h+=`</div><div class="font-bold text-lg mb-1">賽道長度（越長題目越多）：</div><div class="flex flex-wrap gap-2 mb-1">${[15,25,35,45].map(L=>`<button onclick="setLen(${L})" class="px-4 py-2 rounded-2xl font-black text-lg leading-tight ${L===len?'bg-orange-500 text-white':'bg-gray-100'}">${L} 格<br><span class="text-sm font-bold">最快約 ${Math.ceil((L-1)/(5+bonus)*5)} 題</span></button>`).join('')}</div><div class="text-sm text-gray-500 mb-3">「最快」是指某位小朋友每題都上場、每題都答對。實際會輪流上場、也會答錯，通常要 1～2 倍的題數。</div><div class="font-bold text-lg mb-1">⭐ 累積集滿 5 顆星的獎勵（星星是整場累計，不用連續答對）：</div><div class="flex flex-wrap gap-2 mb-3">${[[2,'多走 2 步（原規則）'],[1,'多走 1 步'],[0,'不加速']].map(([b,t])=>`<button onclick="setBonus(${b})" class="px-4 py-2 rounded-2xl font-black text-lg ${b===bonus?'bg-orange-500 text-white':'bg-gray-100'}">${t}</button>`).join('')}</div><div class="font-bold text-lg mb-1">姓名、頭像（點頭像會跳出所有圖案）、性別（點一下切換）：</div><div class="grid sm:grid-cols-2 gap-2">`;
+  h+=`</div><div class="font-bold text-lg mb-1">賽道長度（越長題目越多）：</div><div class="flex flex-wrap gap-2 mb-1">${[15,25,35,45].map(L=>`<button onclick="setLen(${L})" class="px-4 py-2 rounded-2xl font-black text-lg leading-tight ${L===len?'bg-orange-500 text-white':'bg-gray-100'}">${L} 格<br><span class="text-sm font-bold">最快約 ${Math.ceil((L-1)/(5+bonus)*5)} 題<br>${n} 人全班約 ${Math.ceil(Math.ceil((L-1)/(5+bonus)*5)*n/1.25)} 題</span></button>`).join('')}</div><div class="text-sm text-gray-500 mb-3">「最快」是指只有一位小朋友一直答、每題都答對。全班輪流上場時，看「全班約」才是整場大概要出的題數（答錯、抽到暫停會再多一些；擲骰子會少一些）。</div><div class="font-bold text-lg mb-1">⭐ 累積集滿 5 顆星的獎勵（星星是整場累計，不用連續答對）：</div><div class="flex flex-wrap gap-2 mb-3">${[[2,'多走 2 步（原規則）'],[1,'多走 1 步'],[0,'不加速']].map(([b,t])=>`<button onclick="setBonus(${b})" class="px-4 py-2 rounded-2xl font-black text-lg ${b===bonus?'bg-orange-500 text-white':'bg-gray-100'}">${t}</button>`).join('')}</div>${grp('🐯 只要有人答錯一題，老虎前進幾格？','wrong',[['5','5 格（衝刺）'],['3','3 格'],['2','2 格'],['1','1 格'],['old','每錯 2 題前進 1 格（舊規則）']])}${grp('🐯 老虎巡邏（每隔一段時間，老虎自己往前追）','patrol',[['round','每一輪 +1 步（輕鬆）'],['mid','每 3/4 輪 +1 步（適中・建議）'],['half','每半輪 +1 步（極限）'],['off','不巡邏']])}${grp('🐯 被小朋友追上或超過時','retreat',[['false','老虎不退後（刺激）'],['true','老虎退後 1 步']])}${grp('🎲 答對怎麼走','dice',[['false','固定走 1 步'],['true','擲骰子走 1～3 步']])}${grp('🎴 命運／機會格（踩到會抽卡：暫停、衝刺、護盾⋯）','cards',[['true','開（有驚喜）'],['false','關']])}<div class="font-bold text-lg mb-1">姓名、頭像（點頭像會跳出所有圖案）、性別（點一下切換）：</div><div class="grid sm:grid-cols-2 gap-2">`;
   for(let i=0;i<n;i++)h+=`<div class="flex items-center gap-2"><button onclick="openAv(${i})" id="av${i}" class="text-4xl w-16 h-16 rounded-2xl bg-yellow-100 border-4 border-yellow-300">${D[i].av}</button><div class="flex-1 min-w-0 flex flex-col gap-1"><input value="${esc(D[i].name)}" oninput="D[${i}].name=this.value" class="min-w-0 border-4 border-sky-200 rounded-2xl px-3 py-2 text-xl font-bold" maxlength="8"><input value="${esc(D[i].say||'')}" oninput="D[${i}].say=this.value" placeholder="🔊 唸法（選填，例如：墨潾）" class="min-w-0 border-2 border-violet-200 rounded-xl px-2 py-1 text-sm font-bold"></div><button onclick="cg(${i})" id="g${i}" class="shrink-0 w-24 h-16 rounded-2xl bg-white border-4 border-sky-200 text-base font-black">${gl(D[i].g)}</button></div>`;
-  h+=`</div>${first?'':'<div class="text-center text-sm text-rose-600 font-bold mt-3">按「套用並重新開始」會讓全部小朋友的進度歸零；只是看看的話請按「回到遊戲」。</div>'}<div class="text-center mt-3 flex flex-wrap justify-center gap-2">${first?'':'<button onclick="closeM()" class="btn bg-gray-500">↩️ 回到遊戲（不重來）</button>'}<button onclick="startGame()" class="btn bg-green-500">🚀 ${first?'開始遊戲':'套用並重新開始'}</button></div>`;
+  h+=`</div>${first?'':'<div class="text-center text-sm text-rose-600 font-bold mt-3">只改姓名、頭像、性別、唸法：按「💾 儲存並繼續遊戲」，進度不會歸零。要改人數或賽道長度，才需要「套用並重新開始」（進度會歸零）。</div>'}<div class="text-center mt-3 flex flex-wrap justify-center gap-2">${first?'':'<button onclick="applyKeep()" class="btn bg-sky-500">💾 儲存並繼續遊戲</button><button onclick="cancelSetup()" class="btn bg-gray-500">✖ 取消</button>'}<button onclick="startGame()" class="btn bg-green-500">🚀 ${first?'開始遊戲':'套用並重新開始'}</button></div>`;
   openM(h);
+}
+const grp=(t,k,o)=>`<div class="font-bold text-lg mb-1">${t}</div><div class="flex flex-wrap gap-2 mb-3">${o.map(([v,l])=>`<button onclick="setCfg('${k}','${v}')" class="px-3 py-2 rounded-2xl font-black text-base ${String(CFG[k])===String(v)?'bg-orange-500 text-white':'bg-gray-100'}">${l}</button>`).join('')}</div>`;
+function setCfg(k,v){CFG[k]=v==='true'?true:v==='false'?false:v;sfx('click');openSetup()}
+let setupBak=null;
+const saveSet=()=>{try{localStorage.setItem('mtc_d',JSON.stringify({D,n,len,bonus,cfg:CFG}))}catch(e){}};
+function applyKeep(){
+  if(n!==S.length||len!==END)return toast('你改了人數或賽道長度，這兩項需要按「套用並重新開始」才會生效。只想改姓名的話，請先把人數和賽道長度改回原本的。',false);
+  S.forEach((x,i)=>{const d=D[i];x.name=d.name||'小朋友';x.av=d.av;x.g=d.g||'';x.say=(d.say||'').trim()||(d.name||'').replace(/沫/g,'墨')});
+  setupBak=null;saveSet();closeM();render();toast('✅ 已更新，繼續遊戲！',false);
+}
+function cancelSetup(){
+  if(setupBak){const b=JSON.parse(setupBak);D=b.D;n=b.n;len=b.len;bonus=b.bonus;CFG=b.CFG;setupBak=null}
+  closeM();
 }
 function setBonus(b){bonus=b;sfx('click');openSetup()}
 function setLen(L){len=L;sfx('click');openSetup()}
@@ -566,34 +896,35 @@ function fixAv(){
   const u=new Set();
   D.slice(0,n).forEach(d=>{if(u.has(d.av))d.av=AV.find(a=>!D.slice(0,n).some(x=>x.av===a));u.add(d.av)});
 }
-function startGame(){try{localStorage.setItem('mtc_d',JSON.stringify({D,n,len,bonus}))}catch(e){}initGame();closeM();sfx('ok');toast(`🐯 老虎來了！${n} 位小朋友加油！`)}
+function startGame(){try{localStorage.setItem('mtc_d',JSON.stringify({D,n,len,bonus,cfg:CFG}))}catch(e){}setupBak=null;initGame();closeM();musicStart();sfx('ok');toast(`🐯 老虎來了！${n} 位小朋友加油！`)}
 function openBank(){
   if(editIdx>=bank.length){editIdx=-1;pendingImg=null}
   let h=`<div class="text-3xl font-black mb-3">📚 題庫管理（共 ${bank.length} 題）</div>
   <div class="grid gap-2 mb-3 bg-fuchsia-50 rounded-2xl p-3"><div class="font-black text-lg">⚡ 一鍵補題（中場休息用）</div>
     <div class="flex flex-wrap gap-2"><button onclick="genAdd(20)" class="btn bg-fuchsia-500 !py-2 !text-lg">🎁 自動新增 20 題</button><button onclick="genAdd(50)" class="btn bg-purple-500 !py-2 !text-lg">🎁 自動新增 50 題</button><button onclick="clearBank()" class="btn bg-rose-500 !py-2 !text-lg">🧹 清空題庫</button></div>
     <div class="text-sm text-gray-600">更快的方法：回主畫面，把「題型」選成「♾️ 自動出題」，題目永遠出不完，完全不用補題。</div></div>
-  <div class="grid gap-2 mb-3"><div class="font-black text-lg">📥 批次貼上（一行一題，題目和答案用 | 隔開）</div>
+  <div class="grid gap-2 mb-3"><div class="font-black text-lg">📥 批次貼上（一行一題：題目|答案，也可寫成 題目|答案|選項|單元）</div>
     <textarea id="bulk" rows="4" placeholder="12 + 9 = ?|21&#10;小明有 8 顆糖，吃掉 3 顆，還剩幾顆？|5" class="border-4 border-indigo-200 rounded-2xl px-3 py-2 text-lg font-bold"></textarea>
     <div class="flex gap-2"><button onclick="bulkAdd(false)" class="btn bg-indigo-500 !py-2 !text-lg">➕ 加入題庫</button><button onclick="bulkAdd(true)" class="btn bg-amber-500 !py-2 !text-lg">♻️ 取代整個題庫</button></div></div>
-  <div class="grid gap-2 mb-3"><div class="font-black text-lg">${editIdx>=0?'✏️ 修改第 '+(editIdx+1)+' 題（改好按「儲存修改」）':'✍️ 單題新增（可附圖片，題目文字可留空）'}</div><input id="nq" placeholder="題目，例如：12 + 9 = ?" class="border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><div class="flex flex-wrap items-center gap-2"><label class="btn bg-teal-500 !py-2 !text-lg cursor-pointer">🖼️ 選圖片／拍照<input type="file" accept="image/*" class="hidden" onchange="pickImg(this)"></label><span class="text-sm text-gray-500">也可以先截圖，在這個視窗按 Ctrl+V 貼上</span></div><div id="imgPrev"></div>
+  <div class="grid gap-2 mb-3"><div class="font-black text-lg">${editIdx>=0?'✏️ 修改第 '+(editIdx+1)+' 題（改好按「儲存修改」）':'✍️ 單題新增（可附圖片，題目文字可留空）'}</div><input id="nq" placeholder="題目，例如：12 + 9 = ?" class="border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><div class="flex flex-wrap gap-2"><select id="nt" class="rounded-2xl border-4 border-indigo-200 bg-white px-2 py-2 text-base font-bold"><option value="">（不分單元）</option>${UN.map(u=>`<option>${u}</option>`).join('')}</select><input id="nta" placeholder="活動名稱（選填，例如：活動2 加法直式計算）" class="flex-1 min-w-0 border-4 border-indigo-200 rounded-2xl px-3 py-2 text-base font-bold"></div>
+    <div class="flex flex-wrap items-center gap-2"><label class="btn bg-teal-500 !py-2 !text-lg cursor-pointer">🖼️ 選圖片／拍照<input type="file" accept="image/*" class="hidden" onchange="pickImg(this)"></label><span class="text-sm text-gray-500">也可以先截圖，在這個視窗按 Ctrl+V 貼上</span></div><div id="imgPrev"></div>
     <input id="no" placeholder="選項（選填，用逗號隔開，例如：甲,乙,丙；留空會自動產生）" class="border-4 border-indigo-200 rounded-2xl px-3 py-3 text-lg font-bold">
     <div class="flex gap-2"><input id="na" placeholder="答案" class="flex-1 min-w-0 border-4 border-indigo-200 rounded-2xl px-3 py-3 text-xl font-bold"><button onclick="addQ()" class="btn bg-indigo-500 !py-2">${editIdx>=0?'💾 儲存修改':'➕ 新增'}</button>${editIdx>=0?'<button onclick="cancelEdit()" class="btn bg-gray-500 !py-2">取消</button>':''}</div></div><div class="space-y-1 mb-3">`;
-  bank.forEach((q,i)=>{h+=`<div class="flex items-center gap-2 ${i===editIdx?'bg-amber-100 ring-2 ring-amber-400':'bg-indigo-50'} rounded-xl px-3 py-2"><span class="flex-1 font-bold cursor-pointer" onclick="editQ(${i})">${i+1}. ${q[2]?`<img src="${q[2]}" class="inline h-9 rounded border mr-1">`:''}${esc(q[0])} <span class="text-green-600">→ ${esc(q[1])}</span>${q[3]?`<span class="text-gray-500 text-sm">　選項：${esc(q[3])}</span>`:''}</span><button onclick="editQ(${i})" class="px-3 py-1 rounded-xl bg-amber-100 font-bold">✏️ 修改</button><button onclick="delQ(${i})" class="px-3 py-1 rounded-xl bg-rose-100 font-bold">🗑️</button></div>`});
+  bank.forEach((q,i)=>{h+=`<div class="flex items-center gap-2 ${i===editIdx?'bg-amber-100 ring-2 ring-amber-400':'bg-indigo-50'} rounded-xl px-3 py-2"><span class="flex-1 font-bold cursor-pointer" onclick="editQ(${i})">${i+1}. ${q[4]?`<span class="text-xs font-bold text-indigo-600 mr-1">[${esc(q[4])}]</span>`:''}${q[2]?`<img src="${q[2]}" class="inline h-9 rounded border mr-1">`:''}${esc(q[0])} <span class="text-green-600">→ ${esc(q[1])}</span>${q[3]?`<span class="text-gray-500 text-sm">　選項：${esc(q[3])}</span>`:''}</span><button onclick="editQ(${i})" class="px-3 py-1 rounded-xl bg-amber-100 font-bold">✏️ 修改</button><button onclick="delQ(${i})" class="px-3 py-1 rounded-xl bg-rose-100 font-bold">🗑️</button></div>`});
   h+=`</div><div class="flex gap-2 justify-between"><button onclick="resetBank()" class="btn bg-gray-500 !py-2 !text-lg">還原預設題庫</button><button onclick="closeM()" class="btn bg-sky-500 !py-2 !text-lg">完成</button></div>`;
   openM(h);
-  if(editIdx>=0&&bank[editIdx]){const q=bank[editIdx];$('nq').value=(q[2]&&q[0]==='請看圖回答')?'':q[0];$('na').value=q[1]||'';$('no').value=q[3]||''}
+  if(editIdx>=0&&bank[editIdx]){const q=bank[editIdx];$('nq').value=(q[2]&&q[0]==='請看圖回答')?'':q[0];$('na').value=q[1]||'';$('no').value=q[3]||'';const tg=String(q[4]||''),u0=UN.find(x=>tg.startsWith(x))||'';$('nt').value=u0;$('nta').value=u0?tg.slice(u0.length).trim():tg}
   showPrev();
 }
 function editQ(i){editIdx=i;pendingImg=bank[i][2]||null;openBank();$('mbox').scrollTop=0;sfx('click')}
 function cancelEdit(){editIdx=-1;pendingImg=null;sfx('click');openBank()}
 function bulkAdd(r){
-  const L=($('bulk').value||'').split(/\r?\n/).map(l=>l.split(/[|｜\t]/)).filter(p=>p[0].trim()).map(p=>[p[0].trim(),(p[1]||'').trim()]);
+  const L=($('bulk').value||'').split(/\r?\n/).map(l=>l.split(/[|｜\t]/)).filter(p=>p[0].trim()).map(p=>[p[0].trim(),(p[1]||'').trim(),'',(p[2]||'').trim(),(p[3]||'').trim()]);
   if(!L.length)return toast('請先貼上題目（一行一題）',false);
   const go=()=>{bank=r?L:bank.concat(L);saveBank();sfx('ok');openBank();toast(`已${r?'取代為':'加入'} ${L.length} 題 ✅`,false)};
   if(r)ask('會清掉目前所有題目，確定嗎？',go);else go();
 }
-function genAdd(k){for(let i=0;i<k;i++)bank.push(GEN[P(Object.keys(GEN))]());saveBank();sfx('ok');openBank();toast(`已自動新增 ${k} 題 🎁`,false)}
+function genAdd(k){for(let i=0;i<k;i++)bank.push(GEN[P(MIX)]());saveBank();sfx('ok');openBank();toast(`已自動新增 ${k} 題 🎁`,false)}
 function clearBank(){ask('確定清空全部題目嗎？',()=>{bank=[];saveBank();openBank()})}
 let pendingImg=null,editIdx=-1;
 function fileToImg(f){return new Promise((res,rej)=>{
@@ -621,7 +952,8 @@ function bigImg(){
 function addQ(){
   const q=$('nq').value.trim(),a=$('na').value.trim(),o=$('no').value.trim();
   if(!q&&!pendingImg)return toast('請輸入題目文字，或選擇圖片',false);
-  const item=fixItem([q||'請看圖回答',a,pendingImg||'',o]);
+  const tg0=$('nt').value,ta0=$('nta').value.trim(),tag=tg0?(tg0+(ta0?' '+ta0:'')):ta0;
+  const item=fixItem([q||'請看圖回答',a,pendingImg||'',o,tag]);
   if(editIdx>=0&&bank[editIdx]){bank[editIdx]=item;toast('已儲存修改 ✅',false)}else bank.push(item);
   editIdx=-1;pendingImg=null;saveBank();sfx('ok');openBank();
 }
@@ -634,6 +966,9 @@ function openPick(){
 
 initGame();
 fillVoices();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=fillVoices;
+try{const m=JSON.parse(localStorage.getItem('mtc_music')||'null');if(m){mu.mode=m.mode||'off';if(typeof m.vol==='number')mVol=m.vol}}catch(e){}
+$('mSel').value=mu.mode;$('mVol').value=Math.round(mVol*100);
+document.addEventListener('click',()=>{if(mu.mode!=='off'&&!mu.timer&&!over)musicStart()},{once:true});
 openSetup(true);
 </script>
 </body>
